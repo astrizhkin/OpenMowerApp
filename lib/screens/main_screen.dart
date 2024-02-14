@@ -13,7 +13,7 @@ class MainScreen extends StatefulWidget {
   MainScreen({super.key});
 
   final widgetList = <Widget>[
-    Dashboard(),const SensorValues(),const Settings()
+    Dashboard(),const SensorValues(),const Settings(),RemoteControl()
   ];
 
   @override
@@ -93,6 +93,17 @@ class _MainScreenState extends State<MainScreen> {
         },
       ));
     }
+
+    drawerList.add(ListTile(
+      leading: n.Icon(Icons.circle),
+      title: const Text('Remote Control'),
+      onTap: () {
+        Get.back();
+        setState(() {
+          _index = 3;
+        });
+      },
+    ));
 
     return drawerList;
   }

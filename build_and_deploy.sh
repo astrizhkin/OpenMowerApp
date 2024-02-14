@@ -2,7 +2,7 @@
 
 rm -rf ./build
 flutter clean
-flutter build web --web-renderer canvaskit
+flutter build web --web-renderer canvaskit --release
 
 rm -rf ../open_mower_ros/web
 

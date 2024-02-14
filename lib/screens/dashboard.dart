@@ -40,29 +40,26 @@ class Dashboard extends GetView<RobotStateController> {
     if (controller.robotState.value.currentState != "AREA_RECORDING") {
       return n.Row([
         !controller.hasAction("mower_logic:mowing/pause")
-            ? (n.Button.elevatedIcon("Start".n, n.Icon(Icons.play_arrow))
-              ..enable =
-                  (controller.hasAction("mower_logic:idle/start_mowing") ||
-                      controller.hasAction("mower_logic:mowing/continue"))
-              ..onPressed = () {
-                if (controller.hasAction("mower_logic:idle/start_mowing")) {
-                  remoteControl.callAction("mower_logic:idle/start_mowing");
-                } else if (controller
-                    .hasAction("mower_logic:mowing/continue")) {
-                  remoteControl.callAction("mower_logic:mowing/continue");
-                }
-              }
-              ..expanded
-              ..elevation = 2
-              ..p = 16)
-            : (n.Button.elevatedIcon("Pause".n, n.Icon(Icons.pause))
-              ..enable = controller.hasAction("mower_logic:mowing/pause")
-              ..onPressed = () {
-                remoteControl.callAction("mower_logic:mowing/pause");
-              }
-              ..expanded
-              ..elevation = 2
-              ..p = 16),
+        ? (n.Button.elevatedIcon("Start".n, n.Icon(Icons.play_arrow))
+          ..enable = (controller.hasAction("mower_logic:idle/start_mowing") || controller.hasAction("mower_logic:mowing/continue"))
+          ..onPressed = () {
+            if (controller.hasAction("mower_logic:idle/start_mowing")) {
+              remoteControl.callAction("mower_logic:idle/start_mowing");
+            } else if (controller.hasAction("mower_logic:mowing/continue")) {
+              remoteControl.callAction("mower_logic:mowing/continue");
+            }
+          }
+          ..expanded
+          ..elevation = 2
+          ..p = 16)
+        : (n.Button.elevatedIcon("Pause".n, n.Icon(Icons.pause))
+          ..enable = controller.hasAction("mower_logic:mowing/pause")
+          ..onPressed = () {
+            remoteControl.callAction("mower_logic:mowing/pause");
+          }
+          ..expanded
+          ..elevation = 2
+          ..p = 16),
         //n.Button.elevatedIcon("Skip area".n, n.Icon(Icons.route))
         //  ..visible = controller.hasAction("mower_logic:mowing/skip_area")
         //  ..onPressed = () {
@@ -80,10 +77,9 @@ class Dashboard extends GetView<RobotStateController> {
           ..p = 16,
         n.Button.elevatedIcon(
             "Area Record".n, n.Icon(Icons.fiber_manual_record))
-          ..enable =
-              controller.hasAction("mower_logic:idle/start_area_recording")
+          ..enable = controller.hasAction("mower_logic:idle/start_area_recording")
           ..onPressed = () {
-            remoteControl.callAction("mower_logic:idle/start_area_recording");
+              remoteControl.callAction("mower_logic:idle/start_area_recording");
           }
           ..elevation = 2
           ..p = 16,
@@ -96,34 +92,29 @@ class Dashboard extends GetView<RobotStateController> {
           n.Column([
             n.Row([
               !controller.hasAction("mower_logic:area_recording/stop_recording")
-                  ? (n.Button.elevatedIcon(
-                  "Record".n, n.Icon(Icons.fiber_manual_record))
-                ..enable = controller
-                    .hasAction("mower_logic:area_recording/start_recording")
-                ..onPressed = () {
-                  remoteControl
-                      .callAction("mower_logic:area_recording/start_recording");
-                }
-                ..expanded
-                ..elevation = 2
-                ..p = 16)
-                  : (n.Button.elevatedIcon(
-                  "Stop".n, n.Icon(Icons.fiber_manual_record))
-                ..visible = controller
-                    .hasAction("mower_logic:area_recording/stop_recording")
-                ..onPressed = () {
-                  remoteControl
-                      .callAction("mower_logic:area_recording/stop_recording");
-                }
-                ..style = n.ButtonStyle(backgroundColor: Colors.red)
-                ..expanded
-                ..elevation = 2
-                ..p = 12),
-            ])
+                ? (n.Button.elevatedIcon("Record".n, n.Icon(Icons.fiber_manual_record))
+                  ..enable = controller.hasAction("mower_logic:area_recording/start_recording")
+                  ..onPressed = () {
+                      remoteControl.callAction("mower_logic:area_recording/start_recording");
+                  }
+                  ..expanded
+                  ..elevation = 2
+                  ..p = 16)
+                : (n.Button.elevatedIcon("Stop".n, n.Icon(Icons.fiber_manual_record))
+                  ..visible = controller.hasAction("mower_logic:area_recording/stop_recording")
+                  ..onPressed = () {
+                      remoteControl.callAction("mower_logic:area_recording/stop_recording");
+                  }
+                  ..style = n.ButtonStyle(backgroundColor: Colors.red)
+                  ..expanded
+                  ..elevation = 2
+                  ..p = 12),
+              ])
               ..pl = 16
               ..pr = 0
-              ..py = 8,n.Row([              
-            n.Button.elevatedIcon("Finish".n, n.Icon(Icons.stop),
+              ..py = 8,
+            n.Row([              
+              n.Button.elevatedIcon("Finish".n, n.Icon(Icons.stop),
                   onPressed: () {
                     n.showDialog(
                         barrierDismissible: false,
@@ -144,11 +135,9 @@ class Dashboard extends GetView<RobotStateController> {
               ..py = 8,
             n.Row([
               n.Button.elevatedIcon("Docking".n, n.Icon(Icons.home))
-                ..enable =
-                controller.hasAction("mower_logic:area_recording/record_dock")
+                ..enable = controller.hasAction("mower_logic:area_recording/record_dock")
                 ..onPressed = () {
-                  remoteControl
-                      .callAction("mower_logic:area_recording/record_dock");
+                    remoteControl.callAction("mower_logic:area_recording/record_dock");
                 }
                 ..elevation = 2
                 ..expanded
@@ -157,13 +146,10 @@ class Dashboard extends GetView<RobotStateController> {
               ..pl = 16
               ..pr = 0
               ..py = 8,n.Row([              
-             n.Button.elevatedIcon(
-                  "Exit".n, n.Icon(Icons.exit_to_app))
-                ..enable = controller
-                    .hasAction("mower_logic:area_recording/exit_recording_mode")
+             n.Button.elevatedIcon("Exit".n, n.Icon(Icons.exit_to_app))
+                ..enable = controller.hasAction("mower_logic:area_recording/exit_recording_mode")
                 ..onPressed = () {
-                  remoteControl
-                      .callAction("mower_logic:area_recording/exit_recording_mode");
+                  remoteControl.callAction("mower_logic:area_recording/exit_recording_mode");
                 }
                 ..elevation = 2
                 ..expanded
