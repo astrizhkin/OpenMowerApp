@@ -69,9 +69,19 @@ class Dashboard extends GetView<RobotStateController> {
         //  ..elevation = 2
         //  ..p = 16,
         n.Button.elevatedIcon("Stop".n, n.Icon(Icons.home))
-          ..enable = controller.hasAction("mower_logic:mowing/abort_mowing")
+          ..enable = controller.hasAnyAction([
+                  "mower_logic:mowing/abort_mowing",
+                  "mower_logic:docking/abort_docking",
+                  "mower_logic:behavior/abort"
+                ])
           ..onPressed = () {
-            remoteControl.callAction("mower_logic:mowing/abort_mowing");
+            if (controller.hasAction("mower_logic:mowing/abort_mowing")) {
+              remoteControl.callAction("mower_logic:mowing/abort_mowing");
+            } else if (controller.hasAction("mower_logic:docking/abort_docking")) {
+              remoteControl.callAction("mower_logic:docking/abort_docking");
+            } else if (controller.hasAction("mower_logic:behavior/abort")){
+              remoteControl.callAction("mower_logic:behavior/abort");
+            }
           }
           ..elevation = 2
           ..p = 16,
