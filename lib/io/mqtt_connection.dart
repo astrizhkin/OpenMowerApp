@@ -85,27 +85,8 @@ class MqttConnection  {
       }
       areaPoly.close();
     }
-    final List<Path> obstaclePolys = [];
-    {
-      final obs = area["obstacles"] ?? [];
-      for (final list in obs) {
-        Path obstaclePoly = Path();
-        bool first = true;
-        for (final pt in list) {
-          if (first) {
-            obstaclePoly.moveTo(pt["x"], -pt["y"]);
-            first = false;
-          } else {
-            obstaclePoly.lineTo(pt["x"], -pt["y"]);
-          }
-        }
-        obstaclePoly.close();
-        obstaclePolys.add(obstaclePoly);
-      }
-    }
 
-
-    return MapAreaModel(areaPoly, obstaclePolys);
+    return MapAreaModel(areaPoly, area["area_type"]);
   }
 
   void parseMap(obj) {
@@ -119,20 +100,14 @@ class MqttConnection  {
     mapModel.dockY =       -obj["d"]["docking_pose"]["y"] ?? 0;
     mapModel.dockHeading = obj["d"]["docking_pose"]["heading"] ?? 0;
 
-    final wa = obj["d"]["working_areas"];
+    final wa = obj["d"]["areas"];
     if(wa != null) {
       for(final area in wa) {
-        mapModel.mowingAreas.add(convertAreaToPath(area));
-      }
-    }
-    final na = obj["d"]["navigation_areas"];
-    if(na != null) {
-      for(final area in na) {
-        mapModel.navigationAreas.add(convertAreaToPath(area));
+        mapModel.areas.add(convertAreaToPath(area));
       }
     }
 
-    print("Got a map with ${mapModel.mowingAreas.length} mowing areas and ${mapModel.navigationAreas.length} navigation areas. Size: ${mapModel.width} x ${mapModel.height}. Docking pos: ${mapModel.dockX}, ${mapModel.dockY}");
+    print("Got a map with ${mapModel.areas.length} areas. Size: ${mapModel.width} x ${mapModel.height}. Docking pos: ${mapModel.dockX}, ${mapModel.dockY}");
 
     final RobotStateController robotStateController = Get.find();
     robotStateController.map.value = mapModel;

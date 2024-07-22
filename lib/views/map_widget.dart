@@ -101,7 +101,7 @@ class MapPainter extends CustomPainter {
   final _navigationFillPaint = Paint()
     ..color = const Color.fromRGBO(250, 250, 250, 1.0)
     ..style = PaintingStyle.fill;
-  final _obstaclePaint = Paint()
+  final _obstacleFillPaint = Paint()
     ..color = const Color.fromRGBO(50, 50, 50, 1.0)
     ..style = PaintingStyle.fill;
   final _coordinateLinesPaint = Paint()
@@ -286,21 +286,24 @@ class MapPainter extends CustomPainter {
 
     //
 
-    for (final area in mapModel.navigationAreas) {
-      canvas.drawPath(area.outline, _navigationFillPaint);
-      canvas.drawPath(area.outline, _mowOutlinePaint);
-      for (final obstacle in area.obstacles) {
-        canvas.drawPath(obstacle, _obstaclePaint);
+    //draw navigation
+    for (final area in mapModel.areas) {
+      if(area.area_type==1){
+        canvas.drawPath(area.outline, _navigationFillPaint);
+        canvas.drawPath(area.outline, _mowOutlinePaint);
       }
     }
-
-    for (final area in mapModel.mowingAreas) {
-      canvas.drawPath(area.outline, _mowFillPaint);
-      // grassPattern.paintOnPath(canvas, Size(mapWidth, mapHeight), area.outline);
-
-      canvas.drawPath(area.outline, _mowOutlinePaint);
-      for (final obstacle in area.obstacles) {
-        canvas.drawPath(obstacle, _obstaclePaint);
+    //draw mowing
+    for (final area in mapModel.areas) {
+      if(area.area_type==2){
+        canvas.drawPath(area.outline, _mowFillPaint);
+        canvas.drawPath(area.outline, _mowOutlinePaint);
+      }
+    }
+    //draw prohibited
+    for (final area in mapModel.areas) {
+      if(area.area_type==3){
+        canvas.drawPath(area.outline, _obstacleFillPaint);
       }
     }
 

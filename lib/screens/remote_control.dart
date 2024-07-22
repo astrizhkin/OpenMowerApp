@@ -17,7 +17,7 @@ class RemoteControl extends GetView<RemoteController> {
   Widget buildSaveAreaDialog() {
     return n.Alert.adaptive()
       ..title = "Save Area".n
-      ..content = "Save area as navigation area or as mowing area?".n
+      ..content = "Save area as navigation, mowing or prohibited?".n
       ..actions = [
         n.Button("Mowing Area".n)
           // ..enable = robotState
@@ -33,6 +33,15 @@ class RemoteControl extends GetView<RemoteController> {
           //     .hasAction("mower_logic:area_recording/finish_navigation_area")
           ..onPressed = () {
             controller.callAction("mower_logic:area_recording/finish_navigation_area");
+            Get.back();
+          }
+          ..bold
+          ..p = 24,
+        n.Button("Prohibited Area".n)
+          // ..enable = robotState
+          //     .hasAction("mower_logic:area_recording/finish_prohibited_area")
+          ..onPressed = () {
+            controller.callAction("mower_logic:area_recording/finish_prohibited_area");
             Get.back();
           }
           ..bold
@@ -111,7 +120,7 @@ class RemoteControl extends GetView<RemoteController> {
                             builder: (context) => buildSaveAreaDialog());
                       })
                         ..enable = robotState
-                            .hasAnyAction(["mower_logic:area_recording/finish_navigation_area","mower_logic:area_recording/finish_mowing_area","mower_logic:area_recording/finish_discard"])
+                            .hasAnyAction(["mower_logic:area_recording/finish_navigation_area","mower_logic:area_recording/finish_mowing_area","mower_logic:area_recording/finish_prohibited_area","mower_logic:area_recording/finish_discard"])
                         ..elevation = 2
                         ..p = 16,
                     ])
