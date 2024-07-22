@@ -23,8 +23,7 @@ class RemoteControl extends GetView<RemoteController> {
           // ..enable = robotState
           //     .hasAction("mower_logic:area_recording/finish_mowing_area")
           ..onPressed = () {
-            controller
-                .callAction("mower_logic:area_recording/finish_mowing_area");
+            controller.callAction("mower_logic:area_recording/finish_mowing_area");
             Get.back();
           }
           ..bold
@@ -33,8 +32,7 @@ class RemoteControl extends GetView<RemoteController> {
           // ..enable = robotState
           //     .hasAction("mower_logic:area_recording/finish_navigation_area")
           ..onPressed = () {
-            controller.callAction(
-                "mower_logic:area_recording/finish_navigation_area");
+            controller.callAction("mower_logic:area_recording/finish_navigation_area");
             Get.back();
           }
           ..bold
@@ -85,26 +83,21 @@ class RemoteControl extends GetView<RemoteController> {
                   },
                 )),*/
                     n.Row([
-                      !robotState.hasAction(
-                              "mower_logic:area_recording/stop_recording")
+                      !robotState.hasAction("mower_logic:area_recording/stop_recording")
                           ? (n.Button.elevatedIcon("Start Recording".n,
                               n.Icon(Icons.fiber_manual_record))
-                            ..enable = robotState.hasAction(
-                                "mower_logic:area_recording/start_recording")
+                            ..enable = robotState.hasAction("mower_logic:area_recording/start_recording")
                             ..onPressed = () {
-                              controller.callAction(
-                                  "mower_logic:area_recording/start_recording");
+                              controller.callAction("mower_logic:area_recording/start_recording");
                             }
                             ..expanded
                             ..elevation = 2
                             ..p = 16)
                           : (n.Button.elevatedIcon("Stop Recording".n,
                               n.Icon(Icons.fiber_manual_record))
-                            ..visible = robotState.hasAction(
-                                "mower_logic:area_recording/stop_recording")
+                            ..visible = robotState.hasAction("mower_logic:area_recording/stop_recording")
                             ..onPressed = () {
-                              controller.callAction(
-                                  "mower_logic:area_recording/stop_recording");
+                              controller.callAction("mower_logic:area_recording/stop_recording");
                             }
                             ..style = n.ButtonStyle(backgroundColor: Colors.red)
                             ..expanded
@@ -128,26 +121,46 @@ class RemoteControl extends GetView<RemoteController> {
                     n.Row([
                       n.Button.elevatedIcon(
                           "Record Docking".n, n.Icon(Icons.home))
-                        ..enable = robotState
-                            .hasAction("mower_logic:area_recording/record_dock")
+                        ..enable = robotState.hasAction("mower_logic:area_recording/record_dock")
                         ..onPressed = () {
-                          controller.callAction(
-                              "mower_logic:area_recording/record_dock");
+                          controller.callAction("mower_logic:area_recording/record_dock");
                         }
                         ..elevation = 2
                         ..expanded
                         ..p = 16,
                       n.Button.elevatedIcon(
                           "Exit Recording Mode".n, n.Icon(Icons.exit_to_app))
-                        ..enable = robotState.hasAction(
-                            "mower_logic:area_recording/exit_recording_mode")
+                        ..enable = robotState.hasAction("mower_logic:area_recording/exit_recording_mode")
                         ..onPressed = () {
-                          controller.callAction(
-                              "mower_logic:area_recording/exit_recording_mode");
+                          controller.callAction("mower_logic:area_recording/exit_recording_mode");
                         }
                         ..elevation = 2
                         ..expanded
                         ..p = 16,
+                    ])
+                      ..gap = 8
+                      ..px = 16
+                      ..py = 8,
+                    n.Row([
+                      n.Button.elevatedIcon(
+                          "Start Mowing".n, n.Icon(Icons.play_arrow))
+                        ..enable = robotState.hasAction("mower_logic:idle/start_mowing")
+                        ..onPressed = () {
+                          controller.callAction("mower_logic:idle/start_mowing");
+                        }
+                        ..elevation = 2
+                        ..expanded
+                        ..p = 16,
+                      n.Button.elevatedIcon(
+                          "Debug".n, n.Icon(Icons.circle))
+                        ..enable = robotState.hasAction("mower_logic:idle/start_debug")
+                        ..onPressed = () {
+                          controller.callAction("mower_logic:idle/start_debug");
+                        }
+                        ..elevation = 2
+                        ..expanded
+                        ..p = 16,
+                      
                     ])
                       ..gap = 8
                       ..px = 16
