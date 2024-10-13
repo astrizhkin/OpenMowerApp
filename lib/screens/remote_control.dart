@@ -50,7 +50,7 @@ class RemoteControl extends GetView<RemoteController> {
                 )),*/
                     n.Row([
                       n.Button.elevatedIcon(
-                          "Stop".n, n.Icon(Icons.play_arrow))
+                          "Stop".n, n.Icon(Icons.stop))
                         ..enable = robotState.hasAction("mower_logic:behavior/abort")
                         ..onPressed = () {
                           controller.callAction("mower_logic:behavior/abort");
