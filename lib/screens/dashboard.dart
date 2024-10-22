@@ -60,14 +60,14 @@ class Dashboard extends GetView<RobotStateController> {
           ..expanded
           ..elevation = 2
           ..p = 16),
-        //n.Button.elevatedIcon("Skip area".n, n.Icon(Icons.route))
-        //  ..visible = controller.hasAction("mower_logic:mowing/skip_area")
-        //  ..onPressed = () {
-        //    remoteControl.callAction("mower_logic:mowing/skip_area");
-        //  }
-        //  ..style = n.ButtonStyle(backgroundColor: Colors.orangeAccent)
-        //  ..elevation = 2
-        //  ..p = 16,
+        n.Button.elevatedIcon("Skip area".n, n.Icon(Icons.route))
+          ..visible = controller.hasAction("mower_logic:mowing/skip_area")
+          ..onPressed = () {
+            remoteControl.callAction("mower_logic:mowing/skip_area");
+          }
+          ..style = n.ButtonStyle(backgroundColor: Colors.orangeAccent)
+          ..elevation = 2
+          ..p = 16,
         n.Button.elevatedIcon("Stop".n, n.Icon(Icons.home))
           ..enable = controller.hasAnyAction([
                   "mower_logic:mowing/abort_mowing",
