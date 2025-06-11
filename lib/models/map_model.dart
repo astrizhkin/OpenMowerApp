@@ -8,6 +8,7 @@ class MapModel {
 class MapAreaModel {
   final Path outline;
   final int area_type;
+  final String name;
 
-  MapAreaModel(this.outline, this.area_type);
+  MapAreaModel(this.outline, this.area_type, this.name);
 }

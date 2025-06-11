@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -5,6 +7,7 @@ import 'package:niku/namespace.dart' as n;
 import 'package:open_mower_app/controllers/remote_controller.dart';
 import 'package:open_mower_app/controllers/robot_state_controller.dart';
 import 'package:open_mower_app/models/joystick_command.dart';
+import 'package:open_mower_app/models/map_model.dart';
 import 'package:open_mower_app/screens/remote_control.dart';
 //import 'package:open_mower_app/views/joystick/lib/flutter_joystick.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
@@ -41,13 +44,17 @@ class Dashboard extends GetView<RobotStateController> {
       return n.Row([
         !controller.hasAction("mower_logic:mowing/pause")
         ? (n.Button.elevatedIcon("Start".n, n.Icon(Icons.play_arrow))
-          ..enable = (controller.hasAction("mower_logic:idle/start_mowing") || controller.hasAction("mower_logic:mowing/continue"))
+          ..enable = controller.hasAnyAction(["mower_logic:idle/start_mowing","mower_logic:mowing/continue"])
           ..onPressed = () {
             if (controller.hasAction("mower_logic:idle/start_mowing")) {
-              remoteControl.callAction("mower_logic:idle/start_mowing");
+              //remoteControl.callAction("mower_logic:idle/start_mowing");
+              n.showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => buildSelectAreasDialog(context));
             } else if (controller.hasAction("mower_logic:mowing/continue")) {
               remoteControl.callAction("mower_logic:mowing/continue");
-            }
+            } 
           }
           ..expanded
           ..elevation = 2
@@ -72,6 +79,7 @@ class Dashboard extends GetView<RobotStateController> {
           ..enable = controller.hasAnyAction([
                   "mower_logic:mowing/abort_mowing",
                   "mower_logic:docking/abort_docking",
+                  "mower_logic:undocking/abort_undocking",
                   "mower_logic:behavior/abort"
                 ])
           ..onPressed = () {
@@ -79,6 +87,8 @@ class Dashboard extends GetView<RobotStateController> {
               remoteControl.callAction("mower_logic:mowing/abort_mowing");
             } else if (controller.hasAction("mower_logic:docking/abort_docking")) {
               remoteControl.callAction("mower_logic:docking/abort_docking");
+            } else if (controller.hasAction("mower_logic:undocking/abort_undocking")) {
+              remoteControl.callAction("mower_logic:undocking/abort_undocking");
             } else if (controller.hasAction("mower_logic:behavior/abort")){
               remoteControl.callAction("mower_logic:behavior/abort");
             }
@@ -237,4 +247,59 @@ class Dashboard extends GetView<RobotStateController> {
           ..p = 24
       ];
   }
+
+  Widget buildSelectAreasDialog(BuildContext context) {
+    MapModel mapModel = controller.map.value;
+    final Map<String,bool> selectedAreas = {};
+    for(final area in mapModel.areas) {
+      if (area.area_type == 2) selectedAreas[area.name] = true;
+    }
+    return StatefulBuilder(builder: (context, setState) {
+      return n.Alert()
+        ..title = "Select areas".n
+        ..content = SingleChildScrollView(
+            child: n.Column([
+              for (final area in mapModel.areas)
+                if (area.area_type == 2)
+                  n.CheckboxListTile(selectedAreas[area.name])
+                    ..title = area.name.n
+                    ..controlAffinity = ListTileControlAffinity.leading
+                    ..onChanged = (value) {
+                        setState(() {
+                          selectedAreas[area.name] = value ?? false;
+                        });
+                    },
+            ])
+          )
+        ..actions = [
+          n.Button("Start".n)
+            ..onPressed = () {
+              String areasStr = "";
+              for(final areaName in selectedAreas.keys){
+                if(selectedAreas[areaName] ?? false) {
+                  if(areasStr.isNotEmpty){
+                    areasStr+=",";
+                  }
+                  areasStr+=areaName;
+                }
+              }
+              remoteControl.callActionJson("mower_logic:idle/start_mowing",areasStr);
+              Get.back();
+            }
+            ..bold
+            ..p = 24,
+          n.Button("Cancel".n)
+            // ..enable = robotState
+            //     .hasAction("mower_logic:area_recording/finish_navigation_area")
+            ..onPressed = () {
+              //remoteControl.callAction(
+              //    "mower_logic:area_recording/finish_navigation_area");
+              Get.back();
+            }
+            ..bold
+            ..p = 24,
+        ];
+    });
+  }
+
 }

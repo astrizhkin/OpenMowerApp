@@ -1,4 +1,5 @@
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
 import 'package:open_mower_app/controllers/sensors_controller.dart';
@@ -86,7 +87,7 @@ class MqttConnection  {
       areaPoly.close();
     }
 
-    return MapAreaModel(areaPoly, area["area_type"]);
+    return MapAreaModel(areaPoly, area["area_type"], area["name"]);
   }
 
   void parseMap(obj) {
@@ -193,6 +194,7 @@ class MqttConnection  {
 
       print("available actions: $newActionSet");
       robotStateController.availableActions.value = newActionSet;
+      robotStateController.availableActions.refresh();
   }
 
   void onConnected() {
@@ -224,12 +226,17 @@ class MqttConnection  {
             }
             break;
             case "map_overlay/bson": {
+              //DateTime start = DateTime.now();
+              //print("Got map overlay ${start.toString()}");
               final bytes = payload.payload.message?.toList(growable: false);
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
+              //DateTime ser = DateTime.now();
               final object = BSON().deserialize(BsonBinary.from(bytes));
               parseMapOverlay(object);
+              //DateTime fin = DateTime.now();
+              //print("Desreialize ${ser.difference(start).inMilliseconds}, Parse and refresh ${fin.difference(ser).inMilliseconds}");
             }
             break;
             case "robot_state/bson": {
@@ -278,7 +285,6 @@ class MqttConnection  {
     client.subscribe("map/bson", MqttQos.atLeastOnce);
     client.subscribe("map_overlay/bson", MqttQos.atMostOnce);
     client.subscribe("sensor_infos/bson", MqttQos.atLeastOnce);
-    client.subscribe("robot_state/bson", MqttQos.atMostOnce);
     client.subscribe("robot_state/bson", MqttQos.atMostOnce);
     client.subscribe("sensors/+/bson", MqttQos.atMostOnce);
   }
@@ -349,11 +355,11 @@ class MqttConnection  {
     connect();
   }
 
-  void callAction(String action) {
+  void callAction(String topic, String jsonPayload) {
     final builder = MqttPayloadBuilder();
-    builder.addString(action);
+    builder.addString(jsonPayload);
     try {
-      client.publishMessage("/action", MqttQos.exactlyOnce, builder.payload!);
+      client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload!);
     } catch(e) {
       print("error publishing to mqtt");
     }

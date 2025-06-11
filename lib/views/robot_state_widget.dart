@@ -97,28 +97,28 @@ class RobotStateWidget extends GetView<RobotStateController> {
   }
 
   IconData getBatteryIcon(double percentage, bool charging) {
-    if (charging && percentage > 0.875) {
+    if (charging && percentage > 87) {
       return Icons.battery_charging_full;
     }
-    if (percentage > 0.875) {
+    if (percentage > 87) {
       return Icons.battery_full;
     }
-    if (percentage > 0.75) {
+    if (percentage > 75) {
       return Icons.battery_6_bar;
     }
-    if (percentage > 0.625) {
+    if (percentage > 62) {
       return Icons.battery_5_bar;
     }
-    if (percentage > 0.5) {
+    if (percentage > 50) {
       return Icons.battery_4_bar;
     }
-    if (percentage > 0.375) {
+    if (percentage > 37) {
       return Icons.battery_3_bar;
     }
-    if (percentage > 0.25) {
+    if (percentage > 25) {
       return Icons.battery_2_bar;
     }
-    if (percentage > 0.125) {
+    if (percentage > 12) {
       return Icons.battery_1_bar;
     }
     return Icons.battery_0_bar;

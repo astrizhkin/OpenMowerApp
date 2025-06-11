@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bson/bson.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -61,6 +63,15 @@ class RemoteController extends GetxController {
   }
 
   void callAction(String action) {
-    _mqttConnection.callAction(action);
+    _mqttConnection.callAction("action",action);
+  }
+
+  void callActionJson(String action, [String? parameters]) {
+    Map<String, Object> object = {"action": action};
+    if(parameters != null) {
+      object["parameters"] = parameters;
+    }
+    String jsonPayload = jsonEncode(object);
+    _mqttConnection.callAction("actionJson",jsonPayload);
   }
 }

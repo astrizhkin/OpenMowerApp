@@ -63,7 +63,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
           useMaterial3: false,
           colorSchemeSeed: Colors.blue,
-          brightness: Brightness.light
+          brightness: Brightness.light,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: WidgetStateProperty.all<bool>(true),
+            thumbColor: WidgetStateProperty.all(Colors.blue),
+            trackVisibility: WidgetStateProperty.all<bool>(true),
+            trackColor: WidgetStateProperty.all(Colors.black12),
+          )
       ),
       initialRoute: "/",
       getPages: [

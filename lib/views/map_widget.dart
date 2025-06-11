@@ -124,11 +124,13 @@ class MapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // print("map paint");
+    //DateTime start = DateTime.now();
     final backgroundRect = Offset.zero & size;
 
+    //final drawingRect =
+    //    Rect.fromLTRB(25, 150, size.width - 25, size.height - 25);
     final drawingRect =
-        Rect.fromLTRB(25, 150, size.width - 25, size.height - 25);
+        Rect.fromLTRB(0, 0, size.width, size.height);
 
     canvas.drawRect(backgroundRect, _backgroundPaint);
     // backgroundPattern.paintOnRect(canvas, backgroundRect.size, backgroundRect);
@@ -166,8 +168,10 @@ class MapPainter extends CustomPainter {
     double mapWidth = max(mapModel.width, 15);
     double mapHeight = max(mapModel.height, 15);
 
+    //double overlayWidth = max(mapOverlayModel.width, 15);
+    //double overlayHeight = max(mapOverlayModel.height, 15);
 
-    double mapScale = 80;
+    double mapScale = 40;
 
     if (!centerOnRobot) {
       mapScale = min(drawingRect.width / mapWidth,
@@ -345,6 +349,7 @@ class MapPainter extends CustomPainter {
       canvas.translate(-0.5, -0.5);
       canvas.drawPath(path_0, _robotPaint);
     }
+    //print("map paint ${size.toString()} ${DateTime.now().difference(start).inMilliseconds}ms");
   }
 
   Paint getOverlayPaint(OverlayPolygon overlay) {
