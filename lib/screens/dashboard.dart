@@ -40,6 +40,10 @@ class Dashboard extends GetView<RobotStateController> {
   }
 
   Widget getButtonPanel(BuildContext context, RobotStateController controller) {
+    final screenSize = MediaQuery.of(context).size;
+    final useCompactLayout = screenSize.width <= 480;
+    final double buttonPadding = useCompactLayout ? 10 : 16;
+
     if (controller.robotState.value.currentState != "AREA_RECORDING") {
       return n.Row([
         !controller.hasAction("mower_logic:mowing/pause")
@@ -58,7 +62,7 @@ class Dashboard extends GetView<RobotStateController> {
           }
           ..expanded
           ..elevation = 2
-          ..p = 16)
+          ..p = buttonPadding)
         : (n.Button.elevatedIcon("Pause".n, n.Icon(Icons.pause))
           ..enable = controller.hasAction("mower_logic:mowing/pause")
           ..onPressed = () {
@@ -66,16 +70,18 @@ class Dashboard extends GetView<RobotStateController> {
           }
           ..expanded
           ..elevation = 2
-          ..p = 16),
-        n.Button.elevatedIcon("Skip area".n, n.Icon(Icons.route))
-          ..visible = controller.hasAction("mower_logic:mowing/skip_area")
-          ..onPressed = () {
-            remoteControl.callAction("mower_logic:mowing/skip_area");
-          }
-          ..style = n.ButtonStyle(backgroundColor: Colors.orangeAccent)
-          ..elevation = 2
-          ..p = 16,
-        n.Button.elevatedIcon("Stop".n, n.Icon(Icons.home))
+          ..p = buttonPadding),
+
+          if (controller.hasAction("mower_logic:mowing/skip_area")) 
+              n.Button.elevatedIcon((useCompactLayout ? "Next" : "Skip area").n, n.Icon(Icons.route))
+              ..onPressed = () {
+                remoteControl.callAction("mower_logic:mowing/skip_area");
+              }
+              ..style = n.ButtonStyle(backgroundColor: Colors.orangeAccent)
+              ..elevation = 2
+              ..p = buttonPadding,
+
+          n.Button.elevatedIcon("Stop".n, n.Icon(Icons.home))
           ..enable = controller.hasAnyAction([
                   "mower_logic:mowing/abort_mowing",
                   "mower_logic:docking/abort_docking",
@@ -94,21 +100,21 @@ class Dashboard extends GetView<RobotStateController> {
             }
           }
           ..elevation = 2
-          ..p = 16,
+          ..p = buttonPadding,
         n.Button.elevatedIcon(
-            "Area Record".n, n.Icon(Icons.fiber_manual_record))
+            "Record".n, n.Icon(Icons.fiber_manual_record))
           ..enable = controller.hasAction("mower_logic:idle/start_area_recording")
           ..onPressed = () {
               remoteControl.callAction("mower_logic:idle/start_area_recording");
           }
           ..elevation = 2
-          ..p = 16,
+          ..p = buttonPadding,
       ])
         ..gap = 8
-        ..p = 16;
+        ..p = buttonPadding;
     } else {
       return
-        n.Column([n.Row([
+          n.Row([
           n.Column([
             n.Row([
               !controller.hasAction("mower_logic:area_recording/stop_recording")
@@ -119,7 +125,8 @@ class Dashboard extends GetView<RobotStateController> {
                   }
                   ..expanded
                   ..elevation = 2
-                  ..p = 16)
+                  ..px = 12
+                  ..py = 8)
                 : (n.Button.elevatedIcon("Stop".n, n.Icon(Icons.fiber_manual_record))
                   ..visible = controller.hasAction("mower_logic:area_recording/stop_recording")
                   ..onPressed = () {
@@ -128,11 +135,10 @@ class Dashboard extends GetView<RobotStateController> {
                   ..style = n.ButtonStyle(backgroundColor: Colors.red)
                   ..expanded
                   ..elevation = 2
-                  ..p = 12),
+                  ..px = 12
+                  ..py = 8),
               ])
-              ..pl = 16
-              ..pr = 0
-              ..py = 8,
+              ..py = 5,
             n.Row([              
               n.Button.elevatedIcon("Finish".n, n.Icon(Icons.stop),
                   onPressed: () {
@@ -149,11 +155,10 @@ class Dashboard extends GetView<RobotStateController> {
                 ])
                 ..expanded
                 ..elevation = 2
-                ..p = 16,
+                ..px = 12
+                ..py = 8,
             ])
-              ..pl = 16
-              ..pr = 0
-              ..py = 8,
+              ..py = 5,
             n.Row([
               n.Button.elevatedIcon("Docking".n, n.Icon(Icons.home))
                 ..enable = controller.hasAction("mower_logic:area_recording/record_dock")
@@ -162,11 +167,11 @@ class Dashboard extends GetView<RobotStateController> {
                 }
                 ..elevation = 2
                 ..expanded
-                ..p = 16,
+                ..px = 12
+                ..py = 8,
             ])
-              ..pl = 16
-              ..pr = 0
-              ..py = 8,n.Row([              
+              ..py = 5,
+            n.Row([              
              n.Button.elevatedIcon("Exit".n, n.Icon(Icons.exit_to_app))
                 ..enable = controller.hasAction("mower_logic:area_recording/exit_recording_mode")
                 ..onPressed = () {
@@ -174,16 +179,16 @@ class Dashboard extends GetView<RobotStateController> {
                 }
                 ..elevation = 2
                 ..expanded
-                ..p = 16,
+                ..px = 12
+                ..py = 8,
             ])
-              ..pl = 16
-              ..pr = 0
-              ..py = 8,
+              ..py = 5,
           ])
+            ..pl = 16
             ..py = 8
           ..expanded,
           Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Joystick(
                 //initialX: 5,
                 //initialY: 5,
@@ -196,7 +201,6 @@ class Dashboard extends GetView<RobotStateController> {
                       JoystickCommand(-details.y * 1.0, -details.x * 1.6);
                 },
               )),
-        ])
         ]);
     }
   }
@@ -248,6 +252,24 @@ class Dashboard extends GetView<RobotStateController> {
       ];
   }
 
+  Widget scrollbarIfNecessary(BuildContext context, Widget child) {
+    final currentPlatform = Theme.of(context).platform;
+    final ScrollController controller = ScrollController();
+    switch (currentPlatform) {
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        return Scrollbar(
+          controller: controller,
+          child: child
+        );
+    }
+  }
+
   Widget buildSelectAreasDialog(BuildContext context) {
     MapModel mapModel = controller.map.value;
     final Map<String,bool> selectedAreas = {};
@@ -257,19 +279,22 @@ class Dashboard extends GetView<RobotStateController> {
     return StatefulBuilder(builder: (context, setState) {
       return n.Alert()
         ..title = "Select areas".n
-        ..content = SingleChildScrollView(
-            child: n.Column([
-              for (final area in mapModel.areas)
-                if (area.area_type == 2)
-                  n.CheckboxListTile(selectedAreas[area.name])
-                    ..title = area.name.n
-                    ..controlAffinity = ListTileControlAffinity.leading
-                    ..onChanged = (value) {
-                        setState(() {
-                          selectedAreas[area.name] = value ?? false;
-                        });
-                    },
-            ])
+        ..content = scrollbarIfNecessary(
+            context,
+            SingleChildScrollView(
+              child: n.Column([
+                for (final area in mapModel.areas)
+                  if (area.area_type == 2)
+                    n.CheckboxListTile(selectedAreas[area.name])
+                      ..title = area.name.n
+                      ..controlAffinity = ListTileControlAffinity.leading
+                      ..onChanged = (value) {
+                          setState(() {
+                            selectedAreas[area.name] = value ?? false;
+                          });
+                      },
+              ])
+            )
           )
         ..actions = [
           n.Button("Start".n)

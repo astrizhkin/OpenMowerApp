@@ -2,7 +2,9 @@
 
 rm -rf ./build
 flutter clean
-flutter build web --web-renderer canvaskit --release
+#flutter build web --web-renderer canvaskit --release
+flutter build web --release
+
 #--dart-define=FLUTTER_WEB_CANVASKIT_URL=./canvaskit.js 
 #--dart-define=FLUTTER_WEB_USE_SKIA=true
 #--no-web-resources-cdn
