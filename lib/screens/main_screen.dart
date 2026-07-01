@@ -1,8 +1,13 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:niku/namespace.dart' as n;
+import 'package:open_mower_app/controllers/mower_settings_controller.dart';
+import 'package:open_mower_app/controllers/remote_controller.dart';
 import 'package:open_mower_app/screens/dashboard.dart';
+import 'package:open_mower_app/screens/engineering.dart';
+import 'package:open_mower_app/screens/mower_settings.dart';
 import 'package:open_mower_app/screens/sensor_values.dart';
 import 'package:open_mower_app/screens/settings.dart';
 import 'package:open_mower_app/screens/remote_control.dart';
@@ -13,7 +18,12 @@ class MainScreen extends StatefulWidget {
   MainScreen({super.key});
 
   final widgetList = <Widget>[
-    Dashboard(),const SensorValues(),const Settings(),RemoteControl()
+    Dashboard(),
+    const SensorValues(),
+    MowerSettings(),
+    const Settings(),
+    RemoteControl(),
+    Engineering(),
   ];
 
   @override
@@ -23,6 +33,23 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   int _index = 0;
+  final MowerSettingsController _mowerSettings = Get.find();
+  final RemoteController _remoteControl = Get.find();
+  late StreamSubscription _engineeringSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _engineeringSub = _mowerSettings.engineeringUnlocked.stream.listen((_) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _engineeringSub.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +74,18 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  void _setIndex(int index) {
+    Get.back();
+    setState(() {
+      _index = index;
+    });
+  }
+
   List<Widget> buildDrawerList() {
     final drawerList = <Widget>[
       const DrawerHeader(
         decoration: BoxDecoration(
-          color: Colors.blue,
+          color: Colors.deepOrange,
         ),
         child: Padding(
             padding: EdgeInsets.all(24),
@@ -61,36 +95,29 @@ class _MainScreenState extends State<MainScreen> {
       ListTile(
         leading: n.Icon(Icons.speed),
         title: const Text('Dashboard'),
-        onTap: () {
-          Get.back();
-          setState(() {
-            _index = 0;
-          });
-        },
+        onTap: () => _setIndex(0),
       ),
       ListTile(
         leading: n.Icon(Icons.line_axis),
         title: const Text('Sensor Values'),
+        onTap: () => _setIndex(1),
+      ),
+      ListTile(
+        leading: n.Icon(Icons.tune),
+        title: const Text('Mower Settings'),
         onTap: () {
-          Get.back();
-          setState(() {
-            _index = 1;
-          });
+          _mowerSettings.loadFromServer();
+          _setIndex(2);
         },
       ),
     ];
 
-    if(!kReleaseMode || !kIsWeb) {
+    if(!kReleaseMode || !kIsWeb || _mowerSettings.engineeringUnlocked.value) {
       // show the settings screen on debug versions and on native versions
       drawerList.add(ListTile(
         leading: n.Icon(Icons.settings),
-        title: const Text('Settings'),
-        onTap: () {
-          Get.back();
-          setState(() {
-            _index = 2;
-          });
-        },
+        title: const Text('MQTT Settings'),
+        onTap: () => _setIndex(3),
       ));
     }
 
@@ -98,12 +125,18 @@ class _MainScreenState extends State<MainScreen> {
       leading: n.Icon(Icons.circle),
       title: const Text('Remote Control'),
       onTap: () {
-        Get.back();
-        setState(() {
-          _index = 3;
-        });
+        _remoteControl.callAction("mower_logic:idle/start_manual");
+        _setIndex(4);
       },
     ));
+
+    if (_mowerSettings.engineeringUnlocked.value) {
+      drawerList.add(ListTile(
+        leading: n.Icon(Icons.build),
+        title: const Text('Engineering'),
+        onTap: () => _setIndex(5),
+      ));
+    }
 
     return drawerList;
   }

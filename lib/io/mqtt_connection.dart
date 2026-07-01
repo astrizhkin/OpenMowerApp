@@ -1,6 +1,8 @@
 
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
+import 'package:open_mower_app/controllers/mower_settings_controller.dart';
 import 'package:open_mower_app/controllers/sensors_controller.dart';
 import 'package:open_mower_app/models/map_model.dart';
 import 'package:open_mower_app/models/robot_state.dart';
@@ -36,6 +38,7 @@ class MqttConnection  {
   final SettingsController settingsController = Get.find();
   final RobotStateController robotStateController = Get.find();
   final SensorsController sensorsController = Get.find();
+  final MowerSettingsController mowerSettingsController = Get.find();
 
   final RegExp exp = RegExp(r'sensors/(.*)/bson');
 
@@ -258,6 +261,17 @@ class MqttConnection  {
               parseSensorInfos(object);
             }
             break;
+            case "parameterState/json": {
+              final bytes = payload.payload.message;
+              if (bytes != null && bytes.isNotEmpty) {
+                final payloadStr = utf8.decode(bytes);
+                final object = jsonDecode(payloadStr);
+                if (object.containsKey("config")) {
+                  mowerSettingsController.applyServerState(object["config"]);
+                }
+              }
+            }
+            break;
             default: {
               if(msg.topic != null) {
                 // It's probably some sensor data, get ID
@@ -286,6 +300,7 @@ class MqttConnection  {
     client.subscribe("sensor_infos/bson", MqttQos.atLeastOnce);
     client.subscribe("robot_state/bson", MqttQos.atMostOnce);
     client.subscribe("sensors/+/bson", MqttQos.atMostOnce);
+    client.subscribe("parameterState/json", MqttQos.atMostOnce);
   }
 
   void onDisconnected() {
@@ -362,6 +377,16 @@ class MqttConnection  {
     } catch(e) {
       print("error publishing to mqtt");
     }
+  }
+
+  void setParameter(String node, Map<String, dynamic> params) {
+    final payload = jsonEncode({"action": "setParameter", "node": node, "config": params});
+    callAction("actionJson", payload);
+  }
+
+  void requestParameters(String node) {
+    final payload = jsonEncode({"action": "getParameter", "node": node});
+    callAction("actionJson", payload);
   }
 
 }

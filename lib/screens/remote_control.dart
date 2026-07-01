@@ -50,33 +50,16 @@ class RemoteControl extends GetView<RemoteController> {
                 )),*/
                     n.Row([
                       n.Button.elevatedIcon(
-                          "Stop".n, n.Icon(Icons.stop))
-                        ..enable = robotState.hasAction("mower_logic:behavior/abort")
+                          "Exit".n, n.Icon(Icons.stop))
+                        ..enable = robotState.hasAnyAction(["mower_logic:behavior/abort"])
                         ..onPressed = () {
-                          controller.callAction("mower_logic:behavior/abort");
+                          if (robotState.hasAction("mower_logic:behavior/abort")) {
+                            controller.callAction("mower_logic:behavior/abort");
+                          }
                         }
                         ..elevation = 2
                         ..expanded
                         ..p = 16,
-                      n.Button.elevatedIcon(
-                          "Manual".n, n.Icon(Icons.circle))
-                        ..enable = robotState.hasAction("mower_logic:idle/start_manual")
-                        ..onPressed = () {
-                          controller.callAction("mower_logic:idle/start_manual");
-                        }
-                        ..elevation = 2
-                        ..expanded
-                        ..p = 16,
-                      n.Button.elevatedIcon(
-                          "Debug".n, n.Icon(Icons.circle))
-                        ..enable = robotState.hasAction("mower_logic:idle/start_debug")
-                        ..onPressed = () {
-                          controller.callAction("mower_logic:idle/start_debug");
-                        }
-                        ..elevation = 2
-                        ..expanded
-                        ..p = 16,
-                      
                     ])
                       ..gap = 8
                       ..px = 16

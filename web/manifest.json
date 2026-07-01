@@ -1,11 +1,11 @@
 {
-    "name": "open_mower_app",
-    "short_name": "open_mower_app",
+    "name": "striga_app",
+    "short_name": "striga_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "The Open Mower app",
+    "description": "The Striga app",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

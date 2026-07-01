@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:open_mower_app/controllers/mower_settings_controller.dart';
 import 'package:open_mower_app/controllers/remote_controller.dart';
 import 'package:open_mower_app/controllers/robot_state_controller.dart';
 import 'package:open_mower_app/controllers/sensors_controller.dart';
@@ -19,8 +20,9 @@ void main() async {
   settingsController.load();
 
   // Second the robotStateController. MQTTConnection needs it
-  final robotStateController = Get.put(RobotStateController());
-  final sensorStateController = Get.put(SensorsController());
+  Get.put(RobotStateController());
+  Get.put(SensorsController());
+  Get.put(MowerSettingsController());
 
   initServices();
   final MqttConnection mqttConnection = Get.find();
@@ -50,7 +52,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'OpenMower',
+      title: 'Striga',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -62,11 +64,11 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
           useMaterial3: false,
-          colorSchemeSeed: Colors.blue,
+          colorSchemeSeed: Colors.deepOrangeAccent,
           brightness: Brightness.light,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: WidgetStateProperty.all<bool>(true),
-            thumbColor: WidgetStateProperty.all(Colors.blue),
+            thumbColor: WidgetStateProperty.all(Colors.deepOrange),
             trackVisibility: WidgetStateProperty.all<bool>(true),
             trackColor: WidgetStateProperty.all(Colors.black12),
           )

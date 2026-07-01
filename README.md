@@ -1,1 +1,1 @@
-# OpenMowerApp
+# StrigaApp
