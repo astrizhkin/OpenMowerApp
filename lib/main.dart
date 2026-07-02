@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
           useMaterial3: false,
-          colorSchemeSeed: Colors.deepOrangeAccent,
+          colorSchemeSeed: Colors.deepOrange,
           brightness: Brightness.light,
           scrollbarTheme: ScrollbarThemeData(
             thumbVisibility: WidgetStateProperty.all<bool>(true),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LogoWidgetDrawer extends StatelessWidget {
   const LogoWidgetDrawer({super.key, required this.size});
@@ -8,38 +8,12 @@ class LogoWidgetDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: LogoCustomPainterDrawer(),
-      size: Size(size, size * 0.4195859872611465),
+    return SvgPicture.asset(
+      'fonts/striga.svg',
+      width: size,
+      height: size * 0.4195859872611465,
+      fit: BoxFit.contain,
+      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
     );
-  }
-}
-
-class LogoCustomPainterDrawer extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: 'Striga',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: size.height * 0.65,
-          fontFamily: 'Roboto',
-        ),
-      ),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(maxWidth: size.width);
-
-    final offsetX = (size.width - textPainter.width) / 2;
-    final offsetY = (size.height + textPainter.height) / 2;
-
-    textPainter.paint(canvas, Offset(offsetX, offsetY));
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
   }
 }
