@@ -297,7 +297,7 @@ class Dashboard extends GetView<RobotStateController> {
             )
           )
         ..actions = [
-          n.Button("Start".n)
+          n.Button("Start (${selectedAreas.values.where((v) => v).length})".n)
             ..onPressed = () {
               String areasStr = "";
               for(final areaName in selectedAreas.keys){
