@@ -56,7 +56,7 @@ class MowerSettings extends GetView<MowerSettingsController> {
               value: controller.dockStationAtHome.value,
               onChanged: controller.updateDockStationAtHome,
             )),
-          ]),
+          ])..mb = 8,
         ])
           ..m = 16
           ..crossAxisAlignment = CrossAxisAlignment.start,
