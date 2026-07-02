@@ -6,6 +6,8 @@ import 'package:open_mower_app/io/mqtt_connection.dart';
 class MowerSettingsController extends GetxController {
   var mowerPower = 1.0.obs;
   var sensorBehavior = 1.obs; // 0=Ignore, 1=Stop, 2=Avoid
+  var perimeterDryRun = false.obs;
+  var dockStationAtHome = false.obs;
   var engineeringUnlocked = false.obs;
   Timer? _debounceTimer;
 
@@ -32,6 +34,18 @@ class MowerSettingsController extends GetxController {
     _mqttConnection.setParameter("mower_logic", {"sensor_behavior": value});
   }
 
+  void updatePerimeterDryRun(bool value) {
+    perimeterDryRun.value = value;
+    perimeterDryRun.refresh();
+    _mqttConnection.setParameter("mower_logic", {"perimeter_dry_run": value});
+  }
+
+  void updateDockStationAtHome(bool value) {
+    dockStationAtHome.value = value;
+    dockStationAtHome.refresh();
+    _mqttConnection.setParameter("mower_logic", {"dock_station_at_home": value});
+  }
+
   void checkAccessCode() {
     if (accessCodeController.text == "developer") {
       engineeringUnlocked.value = true;
@@ -47,6 +61,14 @@ class MowerSettingsController extends GetxController {
     if (config.containsKey("sensor_behavior")) {
       sensorBehavior.value = config["sensor_behavior"] as int;
       sensorBehavior.refresh();
+    }
+    if (config.containsKey("perimeter_dry_run")) {
+      perimeterDryRun.value = config["perimeter_dry_run"] as bool;
+      perimeterDryRun.refresh();
+    }
+    if (config.containsKey("dock_station_at_home")) {
+      dockStationAtHome.value = config["dock_station_at_home"] as bool;
+      dockStationAtHome.refresh();
     }
   }
 

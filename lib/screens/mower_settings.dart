@@ -12,29 +12,22 @@ class MowerSettings extends GetView<MowerSettingsController> {
       n.Text("Mower Settings")..mb = 16,
       GetBuilder<MowerSettingsController>(
           builder: (val) => Card(
-            elevation: 3,
-            child: n.Column([
-              n.Row([
-                n.Text("Mower Power"),
-                Expanded(child: Container()),
-                Obx(() => n.Text("${(controller.mowerPower.value * 100).toStringAsFixed(0)}%")),
-              ])..mb = 8,
-              Obx(
-                () => Slider(
-                  value: controller.mowerPower.value,
-                  min: 0.0,
-                  max: 1.0,
-                  divisions: 100,
-                  onChanged: controller.updateMowerPower,
-                ),
-              ),
-            ])
-              ..m = 16
-              ..crossAxisAlignment = CrossAxisAlignment.start,
-          )),
-      Card(
         elevation: 3,
         child: n.Column([
+          n.Row([
+            n.Text("Mower Power"),
+            Expanded(child: Container()),
+            Obx(() => n.Text("${(controller.mowerPower.value * 100).toStringAsFixed(0)}%")),
+            Obx(
+              () => Slider(
+                value: controller.mowerPower.value,
+                min: 0.0,
+                max: 1.0,
+                divisions: 20,
+                onChanged: controller.updateMowerPower,
+              ),
+            ),
+          ])..mb = 8,
           n.Row([
             n.Text("Sensor Behavior"),
             Expanded(child: Container()),
@@ -47,11 +40,27 @@ class MowerSettings extends GetView<MowerSettingsController> {
               ],
               onChanged: (v) => controller.updateSensorBehavior(v!),
             )),
+          ])..mb = 8,
+          n.Row([
+            n.Text("Perimeter Dry Run"),
+            Expanded(child: Container()),
+            Obx(() => Switch(
+              value: controller.perimeterDryRun.value,
+              onChanged: controller.updatePerimeterDryRun,
+            )),
+          ])..mb = 8,
+          n.Row([
+            n.Text("Dock Station at Home"),
+            Expanded(child: Container()),
+            Obx(() => Switch(
+              value: controller.dockStationAtHome.value,
+              onChanged: controller.updateDockStationAtHome,
+            )),
           ]),
         ])
           ..m = 16
           ..crossAxisAlignment = CrossAxisAlignment.start,
-      ),
+      )),
       Card(
         elevation: 3,
         child: n.Column([
@@ -67,7 +76,7 @@ class MowerSettings extends GetView<MowerSettingsController> {
           n.TextFormField(
             label: "Code".n,
             controller: controller.accessCodeController,
-          ),
+          )..asPassword,
         ])
           ..m = 16
           ..crossAxisAlignment = CrossAxisAlignment.start,
