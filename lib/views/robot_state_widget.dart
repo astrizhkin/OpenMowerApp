@@ -45,7 +45,7 @@ class RobotStateWidget extends GetView<RobotStateController> {
                           controller.robotState.value.isConnected
                               ? Icons.link
                               : Icons.link_off,
-                          color: Colors.black54),
+                          color: controller.robotState.value.isConnected ? Colors.black54 : Colors.red),
                       alignment: PlaceholderAlignment.middle),
                 ])),
             // RichText(
