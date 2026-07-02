@@ -341,7 +341,7 @@ class MapPainter extends CustomPainter {
           Offset.zero,
           0.3,
           Paint()
-            ..color = Colors.blueAccent.withOpacity(0.4)
+            ..color = Colors.deepOrangeAccent.withOpacity(0.4)
             ..style = PaintingStyle.fill);
 
       canvas.rotate(-(robotState.heading - pi / 2) % (2.0 * pi));

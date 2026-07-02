@@ -22,11 +22,15 @@ class RobotStateWidget extends GetView<RobotStateController> {
       return Obx(() => n.Row([
             RichText(
                 text: TextSpan(
-                  style: const TextStyle(color: Colors.black87),
+                  style: controller.robotState.value.isEmergency ? 
+                    const TextStyle(color: Colors.red) : 
+                    const TextStyle(color: Colors.black87),
                   text: controller.robotState.value.currentState)),
             RichText(
                 text: TextSpan(
-                  style: const TextStyle(color: Colors.black87),
+                  style: controller.robotState.value.isEmergency ? 
+                    const TextStyle(color: Colors.red) : 
+                    const TextStyle(color: Colors.black87),
                   text: controller.robotState.value.currentSubState)),
             n.Column([]).expanded,
             RichText(
