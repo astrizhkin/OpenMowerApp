@@ -31,7 +31,9 @@ class RobotStateWidget extends GetView<RobotStateController> {
                   style: controller.robotState.value.isEmergency ? 
                     const TextStyle(color: Colors.red) : 
                     const TextStyle(color: Colors.black87),
-                  text: controller.robotState.value.currentSubState)),
+                  text: (controller.robotState.value.isEmergency && 
+                            controller.robotState.value.currentSubState.trim().isEmpty) ? 
+                    "EMERGENCY" : controller.robotState.value.currentSubState)),
             n.Column([]).expanded,
             RichText(
                 text: TextSpan(
