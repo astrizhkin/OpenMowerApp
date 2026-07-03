@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:niku/namespace.dart' as n;
@@ -8,12 +5,10 @@ import 'package:open_mower_app/controllers/remote_controller.dart';
 import 'package:open_mower_app/controllers/robot_state_controller.dart';
 import 'package:open_mower_app/models/joystick_command.dart';
 import 'package:open_mower_app/models/map_model.dart';
-import 'package:open_mower_app/screens/remote_control.dart';
 //import 'package:open_mower_app/views/joystick/lib/flutter_joystick.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
 import 'package:open_mower_app/views/map_widget.dart';
 import 'package:open_mower_app/views/robot_state_widget.dart';
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -30,7 +25,8 @@ class Dashboard extends GetView<RobotStateController> {
       n.Stack([
         Obx(() => MapWidget(
             centerOnRobot:
-                controller.robotState.value.currentState == "AREA_RECORDING")),
+                isMode(controller, "AREA_RECORDING") || isMode(controller, "MANUAL")
+            )),
         
       ])
         ..expanded,
@@ -39,12 +35,188 @@ class Dashboard extends GetView<RobotStateController> {
     ]);
   }
 
+  bool isMode(RobotStateController controller,final String mode) {
+    return controller.robotState.value.currentState == mode;
+  }
+
+//          ..enable = controller.hasAction("mower_logic:idle/start_area_recording")
+//          ..onPressed = () {
+//              remoteControl.callAction("mower_logic:idle/start_area_recording");
+//          }
+
+
+  Widget getActionButtonsColumn(BuildContext context, RobotStateController controller) {
+    if(isMode(controller, "AREA_RECORDING")) {
+      return getAreaRecordingButtonsColumn(context, controller);
+    }else if(isMode(controller, "MANUAL")) {
+      return getManualButtonsColumn(context, controller);
+    } else{
+      return n.Text("Unknown Mode");
+    }
+  }
+
+  Widget getAreaRecordingButtonsColumn(BuildContext context, RobotStateController controller) {
+    return n.Column([
+        n.Row([
+          !controller.hasAction("mower_logic:area_recording/stop_recording")
+            ? (n.Button.elevatedIcon("Record".n, n.Icon(Icons.fiber_manual_record))
+              ..enable = controller.hasAction("mower_logic:area_recording/start_recording")
+              ..onPressed = () {
+                  remoteControl.callAction("mower_logic:area_recording/start_recording");
+              }
+              ..expanded
+              ..elevation = 2
+              ..px = 12
+              ..py = 8)
+            : (n.Button.elevatedIcon("Stop".n, n.Icon(Icons.fiber_manual_record))
+              ..visible = controller.hasAction("mower_logic:area_recording/stop_recording")
+              ..onPressed = () {
+                  remoteControl.callAction("mower_logic:area_recording/stop_recording");
+              }
+              ..style = n.ButtonStyle(backgroundColor: Colors.red)
+              ..expanded
+              ..elevation = 2
+              ..px = 12
+              ..py = 8),
+          ])
+          ..py = 5,
+        n.Row([              
+          n.Button.elevatedIcon("Finish".n, n.Icon(Icons.stop),
+              onPressed: () {
+                n.showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) => buildSaveAreaDialog());
+              })
+            ..enable = controller.hasAnyAction([
+              "mower_logic:area_recording/finish_navigation_area",
+              "mower_logic:area_recording/finish_prohibited_area",
+              "mower_logic:area_recording/finish_mowing_area",
+              "mower_logic:area_recording/finish_discard"
+            ])
+            ..expanded
+            ..elevation = 2
+            ..px = 12
+            ..py = 8,
+        ])
+          ..py = 5,
+        n.Row([
+          n.Button.elevatedIcon("Docking".n, n.Icon(Icons.home))
+            ..enable = controller.hasAction("mower_logic:area_recording/record_dock")
+            ..onPressed = () {
+                if(controller.hasAction("mower_logic:area_recording/cancel_dock")) {
+                  //we have first docking point, ready to save or cancel
+                  n.showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) => buildSaveDockingDialog());
+                } else {
+                  //we start record first docking point
+                  remoteControl.callAction("mower_logic:area_recording/record_dock");
+                }
+            
+            }
+            ..elevation = 2
+            ..expanded
+            ..px = 12
+            ..py = 8,
+        ])
+          ..py = 5,
+        n.Row([              
+          n.Button.elevatedIcon("Exit".n, n.Icon(Icons.exit_to_app))
+            ..enable = controller.hasAction("mower_logic:area_recording/exit_recording_mode")
+            ..onPressed = () {
+              remoteControl.callAction("mower_logic:area_recording/exit_recording_mode");
+            }
+            ..elevation = 2
+            ..expanded
+            ..px = 12
+            ..py = 8,
+        ])
+          ..py = 5,
+      ])
+      ..pl = 16
+      ..py = 8
+      ..expanded;
+  }
+
+  Widget getManualButtonsColumn(BuildContext context, RobotStateController controller) {
+    return n.Column([
+        n.Row([
+          controller.hasAction("mower_logic:manual_mode/start_manual_mowing")
+            ? (n.Button.elevatedIcon("Blade On".n, n.Icon(Icons.play_circle))
+              ..enable = controller.hasAnyAction(["mower_logic:manual_mode/start_manual_mowing"])
+              ..onPressed = () {
+                n.showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) => buildBladeOnDialog(),
+                );
+              }
+              ..expanded
+              ..elevation = 2
+              ..px = 12
+              ..py = 8)
+            : (n.Button.elevatedIcon("Blade Off".n, n.Icon(Icons.stop_circle))
+              ..enable = controller.hasAction("mower_logic:manual_mode/stop_manual_mowing")
+              ..onPressed = () {
+                  remoteControl.callAction("mower_logic:manual_mode/stop_manual_mowing");
+              }
+              //..style = n.ButtonStyle(backgroundColor: Colors.red)
+              ..expanded
+              ..elevation = 2
+              ..px = 12
+              ..py = 8),
+          ])
+          ..py = 5,
+        n.Row([              
+          n.Button.elevatedIcon("Docking".n, n.Icon(Icons.home))
+            ..enable = controller.hasAction("mower_logic:manual_mode/start_docking")
+            ..onPressed = () {
+                remoteControl.callAction("mower_logic:manual_mode/start_docking");
+            }
+            ..expanded
+            ..elevation = 2
+            ..px = 12
+            ..py = 8,
+        ])
+          ..py = 5,
+        n.Row([
+          n.Button.elevatedIcon("Record".n, n.Icon(Icons.fiber_manual_record))
+            ..enable = controller.hasAction("mower_logic:manual_mode/start_area_recording")
+            ..onPressed = () {
+                remoteControl.callAction("mower_logic:manual_mode/start_area_recording");
+            }
+            ..elevation = 2
+            ..expanded
+            ..px = 12
+            ..py = 8,
+        ])
+          ..py = 5,
+        n.Row([              
+          n.Button.elevatedIcon("Exit".n, n.Icon(Icons.exit_to_app))
+            ..enable = controller.hasAction("mower_logic:manual_mode/abort_manual")
+            ..onPressed = () {
+              remoteControl.callAction("mower_logic:manual_mode/abort_manual");
+            }
+            ..elevation = 2
+            ..expanded
+            ..px = 12
+            ..py = 8,
+        ])
+          ..py = 5,
+      ])
+      ..pl = 16
+      ..py = 8
+      ..expanded;
+  }
+
   Widget getButtonPanel(BuildContext context, RobotStateController controller) {
     final screenSize = MediaQuery.of(context).size;
     final useCompactLayout = screenSize.width <= 480;
     final double buttonPadding = useCompactLayout ? 10 : 16;
 
-    if (controller.robotState.value.currentState != "AREA_RECORDING") {
+    if (!isMode(controller, "AREA_RECORDING") && !isMode(controller, "MANUAL")) {
       return n.Row([
         !controller.hasAction("mower_logic:mowing/pause")
         ? (n.Button.elevatedIcon("Start".n, n.Icon(Icons.play_arrow))
@@ -102,10 +274,10 @@ class Dashboard extends GetView<RobotStateController> {
           ..elevation = 2
           ..p = buttonPadding,
         n.Button.elevatedIcon(
-            "Record".n, n.Icon(Icons.fiber_manual_record))
-          ..enable = controller.hasAction("mower_logic:idle/start_area_recording")
+            "Control".n, n.Icon(Icons.gamepad))
+          ..enable = controller.hasAction("mower_logic:idle/start_manual_mode")
           ..onPressed = () {
-              remoteControl.callAction("mower_logic:idle/start_area_recording");
+              remoteControl.callAction("mower_logic:idle/start_manual_mode");
           }
           ..elevation = 2
           ..p = buttonPadding,
@@ -115,78 +287,7 @@ class Dashboard extends GetView<RobotStateController> {
     } else {
       return
           n.Row([
-          n.Column([
-            n.Row([
-              !controller.hasAction("mower_logic:area_recording/stop_recording")
-                ? (n.Button.elevatedIcon("Record".n, n.Icon(Icons.fiber_manual_record))
-                  ..enable = controller.hasAction("mower_logic:area_recording/start_recording")
-                  ..onPressed = () {
-                      remoteControl.callAction("mower_logic:area_recording/start_recording");
-                  }
-                  ..expanded
-                  ..elevation = 2
-                  ..px = 12
-                  ..py = 8)
-                : (n.Button.elevatedIcon("Stop".n, n.Icon(Icons.fiber_manual_record))
-                  ..visible = controller.hasAction("mower_logic:area_recording/stop_recording")
-                  ..onPressed = () {
-                      remoteControl.callAction("mower_logic:area_recording/stop_recording");
-                  }
-                  ..style = n.ButtonStyle(backgroundColor: Colors.red)
-                  ..expanded
-                  ..elevation = 2
-                  ..px = 12
-                  ..py = 8),
-              ])
-              ..py = 5,
-            n.Row([              
-              n.Button.elevatedIcon("Finish".n, n.Icon(Icons.stop),
-                  onPressed: () {
-                    n.showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (context) => buildSaveAreaDialog());
-                  })
-                ..enable = controller.hasAnyAction([
-                  "mower_logic:area_recording/finish_navigation_area",
-                  "mower_logic:area_recording/finish_prohibited_area",
-                  "mower_logic:area_recording/finish_mowing_area",
-                  "mower_logic:area_recording/finish_discard"
-                ])
-                ..expanded
-                ..elevation = 2
-                ..px = 12
-                ..py = 8,
-            ])
-              ..py = 5,
-            n.Row([
-              n.Button.elevatedIcon("Docking".n, n.Icon(Icons.home))
-                ..enable = controller.hasAction("mower_logic:area_recording/record_dock")
-                ..onPressed = () {
-                    remoteControl.callAction("mower_logic:area_recording/record_dock");
-                }
-                ..elevation = 2
-                ..expanded
-                ..px = 12
-                ..py = 8,
-            ])
-              ..py = 5,
-            n.Row([              
-             n.Button.elevatedIcon("Exit".n, n.Icon(Icons.exit_to_app))
-                ..enable = controller.hasAction("mower_logic:area_recording/exit_recording_mode")
-                ..onPressed = () {
-                  remoteControl.callAction("mower_logic:area_recording/exit_recording_mode");
-                }
-                ..elevation = 2
-                ..expanded
-                ..px = 12
-                ..py = 8,
-            ])
-              ..py = 5,
-          ])
-            ..pl = 16
-            ..py = 8
-          ..expanded,
+          getActionButtonsColumn(context, controller),
           Padding(
               padding: const EdgeInsets.all(24),
               child: Joystick(
@@ -205,6 +306,31 @@ class Dashboard extends GetView<RobotStateController> {
     }
   }
 
+  Widget buildSaveDockingDialog() {
+    return n.Alert.adaptive()
+      ..title = "Save Docking".n
+      ..content = "Save new docking point?".n
+      ..actions = [
+        n.Button("Save".n)
+          // ..enable = robotState
+          //     .hasAction("mower_logic:area_recording/finish_mowing_area")
+          ..onPressed = () {
+            remoteControl.callAction("mower_logic:area_recording/record_dock");
+            Get.back();
+          }
+          ..bold
+          ..p = 24,
+        n.Button("Don't Save".n)
+          ..onPressed = () {
+            remoteControl.callAction("mower_logic:area_recording/cancel_dock");
+            Get.back();
+          }
+          ..bold
+          ..color = Colors.red
+          ..p = 24
+      ];
+  }
+
   Widget buildSaveAreaDialog() {
     return n.Alert.adaptive()
       ..title = "Save Area".n
@@ -214,8 +340,7 @@ class Dashboard extends GetView<RobotStateController> {
           // ..enable = robotState
           //     .hasAction("mower_logic:area_recording/finish_mowing_area")
           ..onPressed = () {
-            remoteControl
-                .callAction("mower_logic:area_recording/finish_mowing_area");
+            remoteControl.callAction("mower_logic:area_recording/finish_mowing_area");
             Get.back();
           }
           ..bold
@@ -224,8 +349,7 @@ class Dashboard extends GetView<RobotStateController> {
           // ..enable = robotState
           //     .hasAction("mower_logic:area_recording/finish_navigation_area")
           ..onPressed = () {
-            remoteControl.callAction(
-                "mower_logic:area_recording/finish_navigation_area");
+            remoteControl.callAction("mower_logic:area_recording/finish_navigation_area");
             Get.back();
           }
           ..bold
@@ -234,16 +358,14 @@ class Dashboard extends GetView<RobotStateController> {
           // ..enable = robotState
           //     .hasAction("mower_logic:area_recording/finish_prohibited_area")
           ..onPressed = () {
-            remoteControl.callAction(
-                "mower_logic:area_recording/finish_prohibited_area");
+            remoteControl.callAction("mower_logic:area_recording/finish_prohibited_area");
             Get.back();
           }
           ..bold
           ..p = 24,
         n.Button("Don't Save".n)
           ..onPressed = () {
-            remoteControl
-                .callAction("mower_logic:area_recording/finish_discard");
+            remoteControl.callAction("mower_logic:area_recording/finish_discard");
             Get.back();
           }
           ..bold
@@ -251,6 +373,33 @@ class Dashboard extends GetView<RobotStateController> {
           ..p = 24
       ];
   }
+
+  Widget buildBladeOnDialog() {
+      return n.Alert.adaptive()
+        ..title = "Start Blade?".n
+        ..content = "Make sure it is safe to start mowing blade!".n
+        ..actions = [
+          n.Button("Start".n)
+            ..onPressed = () {
+              remoteControl.callActionJson("mower_logic:manual_mode/start_manual_mowing");
+              Get.back();
+            }
+            ..color = Colors.red
+            ..bold
+            ..p = 24,
+          n.Button("Cancel".n)
+            // ..enable = robotState
+            //     .hasAction("mower_logic:area_recording/finish_navigation_area")
+            ..onPressed = () {
+              //remoteControl.callAction(
+              //    "mower_logic:area_recording/finish_navigation_area");
+              Get.back();
+            }
+            ..bold
+            ..p = 24
+        ];
+  }
+
 
   Widget scrollbarIfNecessary(BuildContext context, Widget child) {
     final currentPlatform = Theme.of(context).platform;

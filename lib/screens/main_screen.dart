@@ -10,7 +10,6 @@ import 'package:open_mower_app/screens/engineering.dart';
 import 'package:open_mower_app/screens/mower_settings.dart';
 import 'package:open_mower_app/screens/sensor_values.dart';
 import 'package:open_mower_app/screens/settings.dart';
-import 'package:open_mower_app/screens/remote_control.dart';
 import 'package:open_mower_app/views/logo_widget.dart';
 import 'package:open_mower_app/views/logo_widget_drawer.dart';
 
@@ -22,7 +21,6 @@ class MainScreen extends StatefulWidget {
     const SensorValues(),
     MowerSettings(),
     const Settings(),
-    RemoteControl(),
     Engineering(),
   ];
 
@@ -121,20 +119,12 @@ class _MainScreenState extends State<MainScreen> {
       ));
     }
 
-    drawerList.add(ListTile(
-      leading: n.Icon(Icons.circle),
-      title: const Text('Remote Control'),
-      onTap: () {
-        _remoteControl.callAction("mower_logic:idle/start_manual");
-        _setIndex(4);
-      },
-    ));
 
     if (_mowerSettings.engineeringUnlocked.value) {
       drawerList.add(ListTile(
         leading: n.Icon(Icons.build),
         title: const Text('Engineering'),
-        onTap: () => _setIndex(5),
+        onTap: () => _setIndex(4),
       ));
     }
 
