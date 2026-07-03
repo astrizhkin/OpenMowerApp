@@ -319,7 +319,7 @@ class MapPainter extends CustomPainter {
           Offset.zero,
           0.3,
           Paint()
-            ..color = Colors.greenAccent.withOpacity(0.4)
+            ..color = Colors.deepOrangeAccent.withOpacity(0.4)
             ..style = PaintingStyle.fill);
       // canvas.rotate(-(mapModel.dockHeading - pi / 2) % (2.0 * pi));
       canvas.scale(0.5);
