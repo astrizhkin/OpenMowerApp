@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:open_mower_app/io/mqtt_connection.dart';
 
 class MowerSettingsController extends GetxController {
-  var mowerPower = 1.0.obs;
+  var mowerPower = 0.75.obs;
   var sensorBehavior = 1.obs; // 0=Ignore, 1=Stop, 2=Avoid
   var perimeterDryRun = false.obs;
   var dockStationAtHome = false.obs;

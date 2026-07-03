@@ -21,9 +21,9 @@ class MowerSettings extends GetView<MowerSettingsController> {
             Obx(
               () => Slider(
                 value: controller.mowerPower.value,
-                min: 0.0,
+                min: 0.5,
                 max: 1.0,
-                divisions: 20,
+                divisions: 10,
                 onChanged: controller.updateMowerPower,
               ),
             ),
