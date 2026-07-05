@@ -158,18 +158,24 @@ Widget _connectionTile(Connection conn, {required bool isAp}) {
 void _confirmRemove(String name) {
   final ctrl = _ctrl;
   Get.dialog(
-    AlertDialog(
+    n.Alert.adaptive(
       title: n.Text("Remove $name?"),
       content: n.Text("This will remove the saved network configuration."),
       actions: [
-        TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
-        TextButton(
-          onPressed: () {
+        n.Button("Cancel".n)
+          ..onPressed = () { 
+              Get.back(); 
+          }
+          ..p = 24
+          ..bold,
+        n.Button("Remove".n)
+          ..onPressed = () {
             ctrl.removeConnection(name);
             Get.back();
-          },
-          child: const Text("Remove"),
-        ),
+          }
+          ..p = 24
+          ..bold
+          ..color = Colors.red
       ],
     ),
   );
@@ -239,7 +245,7 @@ class _ScanList extends ObxWidget {
     final pwCtrl = TextEditingController();
     final autoConnect = false.obs;
     Get.dialog(
-      AlertDialog(
+      n.Alert.adaptive(
         title: n.Text("Connect to $ssid"),
         content: n.Column([
           n.TextFormField(
@@ -261,18 +267,24 @@ class _ScanList extends ObxWidget {
           ),
         ],),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
-          TextButton(
-            onPressed: () {
+          n.Button("Cancel".n)
+              ..onPressed = () {
+                Get.back();
+              }
+              ..p = 24
+              ..bold,
+          n.Button("Connect".n)
+            .. onPressed = () {
               final opts = <String, dynamic>{
                 'autoconnect': autoConnect.value,
                 if (autoConnect.value) 'autoconnect-priority': 100,
               };
               ctrl.connect(ssid, password: pwCtrl.text, options: opts);
               Get.back();
-            },
-            child: const Text("Connect"),
-          ),
+            }
+            ..p = 24
+            ..bold
+            ..color = Colors.red
         ],
       ),
     );
