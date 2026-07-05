@@ -22,7 +22,6 @@ class _WifiSettingsState extends State<WifiSettings> {
     return SingleChildScrollView(
       child: n.Column([
         n.Text("WiFi")..mb = 8,
-        const _StatusCard(),
         const _ApSection(),
         const _KnownNetworksSection(),
         Card(
@@ -46,45 +45,6 @@ class _WifiSettingsState extends State<WifiSettings> {
 }
 
 WifiController get _ctrl => Get.find<WifiController>();
-
-class _StatusCard extends ObxWidget {
-  const _StatusCard();
-
-  @override
-  Widget build() {
-    final ctrl = _ctrl;
-
-    if (ctrl.loading.value && ctrl.activeSsid.value == null) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Card(
-          elevation: 3,
-          child: n.Row([
-            const CircularProgressIndicator(strokeWidth: 2),
-            n.Text("Loading..."),
-          ])
-            ..p = 12
-            ..gap = 8,
-        ),
-      );
-    }
-
-    final ssid = ctrl.activeSsid.value;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Card(
-        elevation: 3,
-        child: n.Row([
-          n.Icon(ssid != null ? Icons.wifi : Icons.wifi_off)
-            ..color = ssid != null ? Colors.green : Colors.grey,
-          n.Text(ssid != null ? 'Connected: $ssid' : 'Not connected'),
-        ])
-          ..p = 12
-          ..gap = 8,
-      ),
-    );
-  }
-}
 
 class _ApSection extends ObxWidget {
   const _ApSection();
