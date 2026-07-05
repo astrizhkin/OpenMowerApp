@@ -3,8 +3,19 @@ import 'package:get/get.dart';
 import 'package:niku/namespace.dart' as n;
 import 'package:open_mower_app/controllers/wifi_controller.dart';
 
-class WifiSettings extends GetView<WifiController> {
+class WifiSettings extends StatefulWidget {
   const WifiSettings({super.key});
+
+  @override
+  State<WifiSettings> createState() => _WifiSettingsState();
+}
+
+class _WifiSettingsState extends State<WifiSettings> {
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.loadConnections();
+  }
 
   @override
   Widget build(BuildContext context) {
