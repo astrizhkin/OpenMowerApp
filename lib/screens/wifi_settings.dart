@@ -134,16 +134,10 @@ Widget _connectionTile(Connection conn, {required bool isAp}) {
       color: isActive ? Colors.green : Colors.grey,
     ),
     title: n.Text(conn.name),
+    subtitle: conn.autoconnect ? n.Text("auto-connect") : null,
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Checkbox(
-          value: conn.autoconnect,
-          side: const BorderSide(color: Colors.grey),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          visualDensity: VisualDensity.compact,
-          onChanged: (val) => _ctrl.toggleAutoconnect(conn, val ?? false),
-        ),
         if (!isActive)
           IconButton(
             icon: const Icon(Icons.play_arrow),
@@ -243,18 +237,38 @@ class _ScanList extends ObxWidget {
   void _showConnectDialog(String ssid) {
     final ctrl = _ctrl;
     final pwCtrl = TextEditingController();
+    final autoConnect = false.obs;
     Get.dialog(
       AlertDialog(
         title: n.Text("Connect to $ssid"),
-        content: n.TextFormField(
-          label: "Password".n,
-          controller: pwCtrl,
-        )..asPassword,
+        content: n.Column([
+          n.TextFormField(
+            label: "Password".n,
+            controller: pwCtrl,
+          )..asPassword,
+          Obx(
+            () => Row(
+              children: [
+                Checkbox(
+                  value: autoConnect.value,
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onChanged: (val) => autoConnect.value = val ?? false,
+                ),
+                n.Text("Auto-connect"),
+              ],
+            ),
+          ),
+        ],),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
           TextButton(
             onPressed: () {
-              ctrl.connect(ssid, pwCtrl.text);
+              final opts = <String, dynamic>{
+                'autoconnect': autoConnect.value,
+                if (autoConnect.value) 'autoconnect-priority': 100,
+              };
+              ctrl.connect(ssid, password: pwCtrl.text, options: opts);
               Get.back();
             },
             child: const Text("Connect"),

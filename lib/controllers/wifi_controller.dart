@@ -143,13 +143,16 @@ class WifiController extends GetxController {
     }
   }
 
-  Future<void> connect(String ssid, [String? password]) async {
+  Future<void> connect(String ssid, {String? password, Map<String, dynamic>? options}) async {
     error.value = '';
 
     try {
       final body = <String, dynamic>{'ssid': ssid};
       if (password != null && password.isNotEmpty) {
         body['password'] = password;
+      }
+      if (options != null) {
+        body['options'] = options;
       }
 
       final response = await http.post(
@@ -183,31 +186,6 @@ class WifiController extends GetxController {
       }
     } catch (e) {
       error.value = 'Activate error: $e';
-    }
-  }
-
-  Future<void> toggleAutoconnect(Connection conn, bool value) async {
-    error.value = '';
-
-    try {
-      final body = <String, dynamic>{'autoconnect': value};
-      if (!conn.isAp) {
-        body['autoconnect-priority'] = 100;
-      }
-
-      final response = await http.patch(
-        Uri.parse('$baseUrl/connections/${Uri.encodeComponent(conn.name)}'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      ).timeout(_timeout);
-
-      if (response.statusCode != 200) {
-        error.value = 'Toggle autoconnect failed: ${response.body}';
-      } else {
-        _loadAll();
-      }
-    } catch (e) {
-      error.value = 'Toggle autoconnect error: $e';
     }
   }
 
