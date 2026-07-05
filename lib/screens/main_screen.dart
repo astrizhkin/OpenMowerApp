@@ -5,11 +5,13 @@ import 'package:get/get.dart';
 import 'package:niku/namespace.dart' as n;
 import 'package:open_mower_app/controllers/mower_settings_controller.dart';
 import 'package:open_mower_app/controllers/remote_controller.dart';
+import 'package:open_mower_app/controllers/wifi_controller.dart';
 import 'package:open_mower_app/screens/dashboard.dart';
 import 'package:open_mower_app/screens/engineering.dart';
 import 'package:open_mower_app/screens/mower_settings.dart';
 import 'package:open_mower_app/screens/sensor_values.dart';
 import 'package:open_mower_app/screens/settings.dart';
+import 'package:open_mower_app/screens/wifi_settings.dart';
 import 'package:open_mower_app/views/logo_widget.dart';
 import 'package:open_mower_app/views/logo_widget_drawer.dart';
 
@@ -22,6 +24,7 @@ class MainScreen extends StatefulWidget {
     MowerSettings(),
     const Settings(),
     Engineering(),
+    const WifiSettings(),
   ];
 
   @override
@@ -106,6 +109,16 @@ class _MainScreenState extends State<MainScreen> {
         onTap: () {
           _mowerSettings.loadFromServer();
           _setIndex(2);
+        },
+      ),
+      ListTile(
+        leading: n.Icon(Icons.wifi),
+        title: const Text('WiFi'),
+        onTap: () {
+          if (!Get.isRegistered<WifiController>()) {
+            Get.put(WifiController());
+          }
+          _setIndex(5);
         },
       ),
     ];
