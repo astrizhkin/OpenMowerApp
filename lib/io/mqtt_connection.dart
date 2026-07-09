@@ -63,7 +63,7 @@ class MqttConnection  {
   void sendJoystick(double x, double r, bool high_qos) {
     final map = {"vx": x,
     "vz": r};
-    final binary = BSON().serialize(map);
+    final binary = BsonCodec.serialize(map);
     final buffer = Uint8Buffer();
     buffer.addAll(binary.byteList);
     try {
@@ -214,7 +214,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseActionInfos(object);
             }
             break;
@@ -223,7 +223,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseMap(object);
             }
             break;
@@ -235,7 +235,7 @@ class MqttConnection  {
                 continue;
               }
               //DateTime ser = DateTime.now();
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseMapOverlay(object);
               //DateTime fin = DateTime.now();
               //print("Desreialize ${ser.difference(start).inMilliseconds}, Parse and refresh ${fin.difference(ser).inMilliseconds}");
@@ -247,7 +247,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseRobotState(object);
             }
             break;
@@ -257,7 +257,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseSensorInfos(object);
             }
             break;
@@ -282,7 +282,7 @@ class MqttConnection  {
                   if(bytes == null || bytes.isBlank == true) {
                     continue;
                   }
-                  final object = BSON().deserialize(BsonBinary.from(bytes));
+                  final object = BsonCodec.deserialize(BsonBinary.from(bytes));
                   parseSensorData(match[1], object);
                 } else {
                   print("got unknown message on topic: ${msg.topic}");

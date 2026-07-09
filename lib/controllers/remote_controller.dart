@@ -57,7 +57,7 @@ class RemoteController extends GetxController {
     if(channel != null) {
       final map = {"vx": x,
         "vz": r};
-      final binary = BSON().serialize(map);
+      final binary = BsonCodec.serialize(map);
       channel?.sink.add(binary.byteList);
     }
   }
