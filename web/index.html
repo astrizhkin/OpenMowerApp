@@ -32,23 +32,8 @@
   <title>open_mower_app</title>
   <link rel="manifest" href="manifest.json">
 
-  <script>
-    window.flutterConfiguration = {
-      canvasKitBaseUrl: "/canvaskit/"
-    };
-  </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
 </head>
 <body>
-  <script>
-    window.addEventListener('load', function(ev) {
-      FlutterLoader.load({
-        serviceWorker: {
-          serviceWorkerVersion: null,
-        }
-      });
-    });
-  </script>
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
