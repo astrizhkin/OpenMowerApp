@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
@@ -34,6 +35,7 @@ class MqttConnection  {
   }
 
   bool _connecting = false;
+  StreamSubscription? _updatesSubscription;
 
   final SettingsController settingsController = Get.find();
   final RobotStateController robotStateController = Get.find();
@@ -46,6 +48,8 @@ class MqttConnection  {
 
 
   void disconnect() {
+    _updatesSubscription?.cancel();
+    _updatesSubscription = null;
     client.autoReconnect = false;
     client.onDisconnected = null;
     client.disconnect();
@@ -205,7 +209,8 @@ class MqttConnection  {
     print("MQTT connected");
     robotStateController.setConnected(true);
 
-    client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+    _updatesSubscription?.cancel();
+    _updatesSubscription = client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
 
       for (var msg in c) {
           // print("got message on ${msg.topic}");
@@ -263,11 +268,14 @@ class MqttConnection  {
               parseSensorInfos(object);
             }
             break;
-            case "parameterState/json": {
-              final bytes = payload.payload.message;
-              if (bytes != null && bytes.isNotEmpty) {
-                final payloadStr = utf8.decode(bytes);
-                final object = jsonDecode(payloadStr);
+            case "parameterState/bson": {
+              final bytes = payload.payload.message?.toList(growable: false);
+              if(bytes == null || bytes.isBlank == true) {
+                continue;
+              }
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
+              if(object.containsKey("d")){
+                object = object["d"];
                 if (object.containsKey("config")) {
                   mowerSettingsController.applyServerState(object["config"]);
                 }
@@ -302,7 +310,7 @@ class MqttConnection  {
     client.subscribe("sensor_infos/bson", MqttQos.atLeastOnce);
     client.subscribe("robot_state/bson", MqttQos.atMostOnce);
     client.subscribe("sensors/+/bson", MqttQos.atMostOnce);
-    client.subscribe("parameterState/json", MqttQos.atMostOnce);
+    client.subscribe("parameterState/bson", MqttQos.atMostOnce);
   }
 
   void onDisconnected() {
@@ -316,9 +324,6 @@ class MqttConnection  {
       return;
     }
     _connecting = true;
-
-    client.disconnect();
-
 
     if(kIsWeb && kReleaseMode) {
       // Connect according to settings
@@ -352,13 +357,18 @@ class MqttConnection  {
 
     try {
       await client.connect();
-    } on Exception catch (e) {
-      print('EXAMPLE::client exception - $e');
-      client.disconnect();
+    } catch (e) {
+      print('MQTT connect exception - $e');
       _connecting = false;
-
       return;
     }
+
+    if (client.connectionStatus?.state != MqttConnectionState.connected) {
+      print('MQTT connect failed, status: ${client.connectionStatus?.state}');
+      _connecting = false;
+      return;
+    }
+
     print("MQTT connect success!");
     _connecting = false;
   }
