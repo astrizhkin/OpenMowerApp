@@ -159,6 +159,8 @@ class MqttConnection  {
     state.currentSubState = obj["d"]["current_sub_state"];
     state.gpsPercent = obj["d"]["gps_percentage"];
     state.batteryPercent = obj["d"]["battery_percentage"];
+    state.lastHeartbeat = DateTime.now();
+
     robotStateController.robotState.value = state;
   }
 

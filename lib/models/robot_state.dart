@@ -16,4 +16,10 @@ class RobotState {
 
   double posX = 0, posY = 0, posAccuracy = 0, heading = 0, headingAccuracy = 0;
   bool headingValid = false;
+  DateTime? lastHeartbeat;
+
+  bool get heartbeatOk => lastHeartbeat != null &&
+      DateTime.now().difference(lastHeartbeat!) < heartbeatTimeout;
 }
+
+const Duration heartbeatTimeout = Duration(seconds: 2);

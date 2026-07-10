@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:open_mower_app/models/map_model.dart';
 import 'package:open_mower_app/models/map_overlay_model.dart';
@@ -10,6 +12,24 @@ class RobotStateController extends GetxController {
   final mapOverlay = MapOverlayModel().obs;
 
   var availableActions = <String>{}.obs;
+
+  Timer? _heartbeatCheckTimer;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _heartbeatCheckTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (robotState.value.isConnected && !robotState.value.heartbeatOk) {
+        robotState.refresh();
+      }
+    });
+  }
+
+  @override
+  void onClose() {
+    _heartbeatCheckTimer?.cancel();
+    super.onClose();
+  }
 
   void start() {
     robotState.value.isRunning = true;
