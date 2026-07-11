@@ -36,6 +36,7 @@ class MqttConnection  {
 
   bool _connecting = false;
   StreamSubscription? _updatesSubscription;
+  DateTime? _lastMessageTime;
 
   final SettingsController settingsController = Get.find();
   final RobotStateController robotStateController = Get.find();
@@ -209,8 +210,10 @@ class MqttConnection  {
     print("MQTT connected");
     robotStateController.setConnected(true);
 
+    _lastMessageTime = DateTime.now();
     _updatesSubscription?.cancel();
     _updatesSubscription = client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+      _lastMessageTime = DateTime.now();
 
       for (var msg in c) {
           // print("got message on ${msg.topic}");
@@ -379,6 +382,29 @@ class MqttConnection  {
     }
     print("trying reconnect MQTT");
     connect();
+  }
+
+  // Some mobile OSes silently stop routing traffic to a Wi-Fi network that
+  // has no internet access (e.g. the mower's own access point), without ever
+  // tearing down the TCP socket. The mqtt client then keeps reporting
+  // "connected" forever while no data actually arrives. Detect that stall by
+  // message inactivity and force a reconnect. robot_state/bson normally
+  // arrives every ~1-2s (see RobotState.heartbeatTimeout), so this leaves a
+  // generous margin while still recovering quickly.
+  static const Duration _watchdogTimeout = Duration(seconds: 10);
+
+  void checkWatchdog() {
+    if(client.connectionStatus?.state != MqttConnectionState.connected) {
+      return;
+    }
+    final lastMessageTime = _lastMessageTime;
+    if(lastMessageTime == null) {
+      return;
+    }
+    if(DateTime.now().difference(lastMessageTime) > _watchdogTimeout) {
+      print("MQTT watchdog: no messages received for ${_watchdogTimeout.inSeconds}s, forcing reconnect");
+      client.disconnect();
+    }
   }
 
   void callAction(String topic, String jsonPayload) {

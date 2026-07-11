@@ -33,6 +33,7 @@ void main() async {
 
   // Periodic MQTT reconnect
   Timer.periodic(const Duration(seconds: 1), (timer) {
+    mqttConnection.checkWatchdog();
     mqttConnection.tryConnect();
   });
 
