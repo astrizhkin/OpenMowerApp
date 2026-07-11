@@ -58,7 +58,15 @@ class MqttConnection  {
 
   void start() {
     // client.logging(on: true);
-    client.keepAlivePeriod = 1;
+    // Keep this at ~20s. Lowering keepAlive (e.g. to 1s) does NOT fix the
+    // downstream stall on the mower AP: a 1 Hz PINGREQ is far too sparse to
+    // hold the Wi-Fi radio out of 802.11 power-save, so buffered downstream
+    // frames still get dropped -- it only adds churn/battery. What actually
+    // keeps the radio awake is the dense uplink stream in RemoteController
+    // (_startRadioKeepAlive). Detecting a dead connection is handled by the
+    // message-inactivity watchdog (checkWatchdog) below, which keys off real
+    // robot_state traffic (a stronger liveness signal than PINGRESP).
+    client.keepAlivePeriod = 20;
     client.autoReconnect = false;
     client.resubscribeOnAutoReconnect = false;
     client.onConnected = onConnected;
