@@ -57,7 +57,7 @@ class MqttConnection  {
 
   void start() {
     // client.logging(on: true);
-    client.keepAlivePeriod = 20;
+    client.keepAlivePeriod = 1;
     client.autoReconnect = false;
     client.resubscribeOnAutoReconnect = false;
     client.onConnected = onConnected;
@@ -273,7 +273,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
+              var object = BsonCodec.deserialize(BsonBinary.from(bytes));
               if(object.containsKey("d")){
                 object = object["d"];
                 if (object.containsKey("config")) {
