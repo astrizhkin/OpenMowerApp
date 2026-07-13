@@ -25,7 +25,7 @@ class RobotStateController extends GetxController {
       }
       if (robotState.value.isConnected && robotState.value.lastHeartbeat != null &&
           DateTime.now().difference(robotState.value.lastHeartbeat!) > const Duration(seconds: 5)) {
-        Get.find<MqttConnection>().tryConnect();
+        Get.find<MqttConnection>().checkWatchdog(robotState.value.lastHeartbeat);
       }
     });
   }

@@ -381,6 +381,19 @@ class MqttConnection  {
     connect();
   }
 
+  void checkWatchdog(DateTime? lastHeartbeat) {
+    if(client.connectionStatus?.state != MqttConnectionState.connected) {
+      return;
+    }
+    if(lastHeartbeat == null) {
+      return;
+    }
+    if(DateTime.now().difference(lastHeartbeat) > const Duration(seconds: 5)) {
+      print("MQTT watchdog: no heartbeat for 5s, disconnecting");
+      client.disconnect();
+    }
+  }
+
   void callAction(String topic, String jsonPayload) {
     final builder = MqttPayloadBuilder();
     builder.addString(jsonPayload);
