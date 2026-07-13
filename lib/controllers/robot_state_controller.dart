@@ -25,7 +25,9 @@ class RobotStateController extends GetxController {
       }
       if (robotState.value.isConnected && robotState.value.lastHeartbeat != null &&
           DateTime.now().difference(robotState.value.lastHeartbeat!) > const Duration(seconds: 5)) {
-        Get.find<MqttConnection>().checkWatchdog(robotState.value.lastHeartbeat);
+        // MQTT client thinks it's connected but no data flows (WiFi power-save).
+        // Disconnect so the periodic tryConnect() in main.dart will reconnect.
+        Get.find<MqttConnection>().client.disconnect();
       }
     });
   }
