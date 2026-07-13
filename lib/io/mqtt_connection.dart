@@ -57,7 +57,7 @@ class MqttConnection  {
 
   void start() {
     // client.logging(on: true);
-    client.keepAlivePeriod = 20;
+    client.keepAlivePeriod = 1;
     client.autoReconnect = false;
     client.resubscribeOnAutoReconnect = false;
     client.onConnected = onConnected;
