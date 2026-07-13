@@ -19,12 +19,12 @@ class RobotStateController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _heartbeatCheckTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+    _heartbeatCheckTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (robotState.value.isConnected && !robotState.value.heartbeatOk) {
         robotState.refresh();
       }
       if (robotState.value.isConnected && robotState.value.lastHeartbeat != null &&
-          DateTime.now().difference(robotState.value.lastHeartbeat!) > const Duration(seconds: 5)) {
+          DateTime.now().difference(robotState.value.lastHeartbeat!) > const Duration(seconds: 8)) {
         // MQTT client thinks it's connected but no data flows (WiFi power-save).
         // Disconnect so the periodic tryConnect() in main.dart will reconnect.
         Get.find<MqttConnection>().disconnect();
