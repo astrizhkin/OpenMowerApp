@@ -51,7 +51,6 @@ class MqttConnection  {
     _updatesSubscription?.cancel();
     _updatesSubscription = null;
     client.autoReconnect = false;
-    client.onDisconnected = null;
     client.disconnect();
   }
 
