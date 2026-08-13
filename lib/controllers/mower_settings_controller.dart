@@ -9,6 +9,7 @@ class MowerSettingsController extends GetxController {
   var perimeterDryRun = false.obs;
   var dockStationAtHome = false.obs;
   var engineeringUnlocked = false.obs;
+  var serviceUnlocked = false.obs;
   Timer? _debounceTimer;
 
   final accessCodeController = TextEditingController();
@@ -50,6 +51,11 @@ class MowerSettingsController extends GetxController {
     if (accessCodeController.text == "developer") {
       engineeringUnlocked.value = true;
       engineeringUnlocked.refresh();
+      serviceUnlocked.value = true;
+      serviceUnlocked.refresh();
+    } else if (accessCodeController.text == "service") {
+      serviceUnlocked.value = true;
+      serviceUnlocked.refresh();
     }
   }
 
