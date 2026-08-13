@@ -34,6 +34,7 @@ class RemoteController extends GetxController {
   static final List<int> _radioKeepAliveBytes =
       BsonCodec.serialize({"ka": 1}).byteList;
   Timer? _radioKeepAliveTimer;
+  Timer? _reconnectTimer;
 
   @override
   void onInit() {
@@ -59,6 +60,8 @@ class RemoteController extends GetxController {
   @override
   void onClose() {
     _stopRadioKeepAlive();
+    _reconnectTimer?.cancel();
+    channel?.sink.close();
     super.onClose();
   }
 
@@ -77,6 +80,14 @@ class RemoteController extends GetxController {
     _radioKeepAliveTimer = null;
   }
 
+  void _scheduleReconnect() {
+    _reconnectTimer?.cancel();
+    print("websocket closed, reconnecting in 1s");
+    _reconnectTimer = Timer(const Duration(seconds: 1), () {
+      connectWebsocket();
+    });
+  }
+
   void _sendRaw(List<int> bytes) {
     if(channel == null || channel?.closeCode != null) {
       connectWebsocket();
@@ -85,6 +96,8 @@ class RemoteController extends GetxController {
   }
 
   void connectWebsocket() {
+    channel?.sink.close();
+
     if(kIsWeb && kReleaseMode) {
       // Release and web, we can just connect to the root of the current URL
       channel = WebSocketChannel.connect(Uri.parse('ws://${Uri.base.host}:9002'));
@@ -93,6 +106,11 @@ class RemoteController extends GetxController {
       channel = WebSocketChannel.connect(Uri.parse('ws://${settingsController.hostname}:9002'));
     }
 
+    channel?.stream.listen(
+      null,
+      onError: (_) => _scheduleReconnect(),
+      onDone: _scheduleReconnect,
+    );
   }
 
   void sendMessage(double x, double r) {
