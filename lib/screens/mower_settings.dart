@@ -36,12 +36,13 @@ class MowerSettings extends GetView<MowerSettingsController> {
             Expanded(
               child: Obx(() => DropdownButton<int>(
                 value: controller.sensorBehavior.value,
-                isExpanded: true,
+                //isExpanded: true,
+                //alignment: AlignmentGeometry.centerRight,
                 items: const [
                   DropdownMenuItem(value: 0, child: Text("Ignore")),
-                  DropdownMenuItem(value: 1, child: Text("Bumper Emergency Only")),
-                  DropdownMenuItem(value: 2, child: Text("Bumper Emergency + Ultrasonic Stop")),
-                  DropdownMenuItem(value: 3, child: Text("Bumper Emergency + Ultrasonic Avoid")),
+                  DropdownMenuItem(value: 1, child: Text("Bumper Emergency")),
+                  DropdownMenuItem(value: 2, child: Text("Bumper + US Stop")),
+                  //DropdownMenuItem(value: 3, child: Text("Bumper + US Avoid")),
                 ],
                 onChanged: (v) => controller.updateSensorBehavior(v!),
               )),
