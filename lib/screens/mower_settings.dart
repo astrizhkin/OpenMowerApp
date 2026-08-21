@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:niku/namespace.dart' as n;
 import 'package:open_mower_app/controllers/mower_settings_controller.dart';
+import 'package:open_mower_app/controllers/remote_controller.dart';
 
 class MowerSettings extends GetView<MowerSettingsController> {
   const MowerSettings({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final RemoteController remoteControl = Get.find();
+
     return n.Column([
       n.Text("Mower Settings")..mb = 16,
       GetBuilder<MowerSettingsController>(
@@ -30,16 +33,20 @@ class MowerSettings extends GetView<MowerSettingsController> {
           ])..mb = 8,
           n.Row([
             n.Text("Sensor Behavior"),
-            Expanded(child: Container()),
-            Obx(() => DropdownButton<int>(
-              value: controller.sensorBehavior.value,
-              items: const [
-                DropdownMenuItem(value: 0, child: Text("Ignore")),
-                DropdownMenuItem(value: 1, child: Text("Stop")),
-                // DropdownMenuItem(value: 2, child: Text("Avoid")),
-              ],
-              onChanged: (v) => controller.updateSensorBehavior(v!),
-            )),
+            Expanded(
+              child: Obx(() => DropdownButton<int>(
+                value: controller.sensorBehavior.value,
+                //isExpanded: true,
+                //alignment: AlignmentGeometry.centerRight,
+                items: const [
+                  DropdownMenuItem(value: 0, child: Text("Ignore")),
+                  DropdownMenuItem(value: 1, child: Text("Bumper Emergency")),
+                  DropdownMenuItem(value: 2, child: Text("Bumper + US Stop")),
+                  //DropdownMenuItem(value: 3, child: Text("Bumper + US Avoid")),
+                ],
+                onChanged: (v) => controller.updateSensorBehavior(v!),
+              )),
+            ),
           ])..mb = 8,
           n.Row([
             n.Text("Perimeter Dry Run"),
@@ -81,6 +88,25 @@ class MowerSettings extends GetView<MowerSettingsController> {
           ..m = 16
           ..crossAxisAlignment = CrossAxisAlignment.start,
       ),
+      Obx(() => controller.serviceUnlocked.value
+          ? Card(
+              elevation: 3,
+              child: n.Column([
+                n.Text("Global Actions"),
+                n.Row([
+                  n.Button.elevatedIcon("New Map".n, n.Icon(Icons.map_outlined))
+                    ..onPressed = () {
+                      remoteControl.callActionJson("mower_logic/new_map", "new_map");
+                    }
+                    ..elevation = 2
+                    ..expanded
+                    ..p = 8,
+                ])..mb = 8,
+              ])
+                ..m = 16
+                ..crossAxisAlignment = CrossAxisAlignment.start,
+            )
+          : Container()),
     ])
       ..p = 16
       ..fullSize;

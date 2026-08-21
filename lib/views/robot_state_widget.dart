@@ -42,10 +42,14 @@ class RobotStateWidget extends GetView<RobotStateController> {
                   //const TextSpan(text: "MQTT: "),
                   WidgetSpan(
                       child: Icon(
-                          controller.robotState.value.isConnected
+                          controller.robotState.value.heartbeatOk
                               ? Icons.link
                               : Icons.link_off,
-                          color: controller.robotState.value.isConnected ? Colors.black54 : Colors.red),
+                          color: controller.robotState.value.isConnected
+                              ? (controller.robotState.value.heartbeatOk
+                                  ? Colors.black54
+                                  : Colors.orange)
+                              : Colors.red),
                       alignment: PlaceholderAlignment.middle),
                 ])),
             // RichText(
@@ -64,9 +68,9 @@ class RobotStateWidget extends GetView<RobotStateController> {
                     children: [
                   //const TextSpan(text: "GPS: "),
                   WidgetSpan(
-                      child: Obx(() => Icon(
+                      child: Icon(
                           getGpsIcon(controller.robotState.value.gpsPercent),
-                          color: Colors.black54)),
+                          color: Colors.black54),
                       alignment: PlaceholderAlignment.middle),
                 ])),
             RichText(

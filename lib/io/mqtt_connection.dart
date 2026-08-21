@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
@@ -34,6 +35,7 @@ class MqttConnection  {
   }
 
   bool _connecting = false;
+  StreamSubscription? _updatesSubscription;
 
   final SettingsController settingsController = Get.find();
   final RobotStateController robotStateController = Get.find();
@@ -46,14 +48,15 @@ class MqttConnection  {
 
 
   void disconnect() {
+    _updatesSubscription?.cancel();
+    _updatesSubscription = null;
     client.autoReconnect = false;
-    client.onDisconnected = null;
     client.disconnect();
   }
 
   void start() {
     // client.logging(on: true);
-    client.keepAlivePeriod = 20;
+    client.keepAlivePeriod = 1;
     client.autoReconnect = false;
     client.resubscribeOnAutoReconnect = false;
     client.onConnected = onConnected;
@@ -63,7 +66,7 @@ class MqttConnection  {
   void sendJoystick(double x, double r, bool high_qos) {
     final map = {"vx": x,
     "vz": r};
-    final binary = BSON().serialize(map);
+    final binary = BsonCodec.serialize(map);
     final buffer = Uint8Buffer();
     buffer.addAll(binary.byteList);
     try {
@@ -159,6 +162,8 @@ class MqttConnection  {
     state.currentSubState = obj["d"]["current_sub_state"];
     state.gpsPercent = obj["d"]["gps_percentage"];
     state.batteryPercent = obj["d"]["battery_percentage"];
+    state.lastHeartbeat = DateTime.now();
+
     robotStateController.robotState.value = state;
   }
 
@@ -203,7 +208,8 @@ class MqttConnection  {
     print("MQTT connected");
     robotStateController.setConnected(true);
 
-    client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
+    _updatesSubscription?.cancel();
+    _updatesSubscription = client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
 
       for (var msg in c) {
           // print("got message on ${msg.topic}");
@@ -214,7 +220,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseActionInfos(object);
             }
             break;
@@ -223,7 +229,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseMap(object);
             }
             break;
@@ -235,7 +241,7 @@ class MqttConnection  {
                 continue;
               }
               //DateTime ser = DateTime.now();
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseMapOverlay(object);
               //DateTime fin = DateTime.now();
               //print("Desreialize ${ser.difference(start).inMilliseconds}, Parse and refresh ${fin.difference(ser).inMilliseconds}");
@@ -247,7 +253,7 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseRobotState(object);
             }
             break;
@@ -257,15 +263,18 @@ class MqttConnection  {
               if(bytes == null || bytes.isBlank == true) {
                 continue;
               }
-              final object = BSON().deserialize(BsonBinary.from(bytes));
+              final object = BsonCodec.deserialize(BsonBinary.from(bytes));
               parseSensorInfos(object);
             }
             break;
-            case "parameterState/json": {
-              final bytes = payload.payload.message;
-              if (bytes != null && bytes.isNotEmpty) {
-                final payloadStr = utf8.decode(bytes);
-                final object = jsonDecode(payloadStr);
+            case "parameterState/bson": {
+              final bytes = payload.payload.message?.toList(growable: false);
+              if(bytes == null || bytes.isBlank == true) {
+                continue;
+              }
+              var object = BsonCodec.deserialize(BsonBinary.from(bytes));
+              if(object.containsKey("d")){
+                object = object["d"];
                 if (object.containsKey("config")) {
                   mowerSettingsController.applyServerState(object["config"]);
                 }
@@ -282,7 +291,7 @@ class MqttConnection  {
                   if(bytes == null || bytes.isBlank == true) {
                     continue;
                   }
-                  final object = BSON().deserialize(BsonBinary.from(bytes));
+                  final object = BsonCodec.deserialize(BsonBinary.from(bytes));
                   parseSensorData(match[1], object);
                 } else {
                   print("got unknown message on topic: ${msg.topic}");
@@ -300,7 +309,7 @@ class MqttConnection  {
     client.subscribe("sensor_infos/bson", MqttQos.atLeastOnce);
     client.subscribe("robot_state/bson", MqttQos.atMostOnce);
     client.subscribe("sensors/+/bson", MqttQos.atMostOnce);
-    client.subscribe("parameterState/json", MqttQos.atMostOnce);
+    client.subscribe("parameterState/bson", MqttQos.atMostOnce);
   }
 
   void onDisconnected() {
@@ -314,9 +323,6 @@ class MqttConnection  {
       return;
     }
     _connecting = true;
-
-    client.disconnect();
-
 
     if(kIsWeb && kReleaseMode) {
       // Connect according to settings
@@ -350,13 +356,18 @@ class MqttConnection  {
 
     try {
       await client.connect();
-    } on Exception catch (e) {
-      print('EXAMPLE::client exception - $e');
-      client.disconnect();
+    } catch (e) {
+      print('MQTT connect exception - $e');
       _connecting = false;
-
       return;
     }
+
+    if (client.connectionStatus?.state != MqttConnectionState.connected) {
+      print('MQTT connect failed, status: ${client.connectionStatus?.state}');
+      _connecting = false;
+      return;
+    }
+
     print("MQTT connect success!");
     _connecting = false;
   }

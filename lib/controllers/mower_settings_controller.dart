@@ -5,10 +5,11 @@ import 'package:open_mower_app/io/mqtt_connection.dart';
 
 class MowerSettingsController extends GetxController {
   var mowerPower = 0.75.obs;
-  var sensorBehavior = 1.obs; // 0=Ignore, 1=Stop, 2=Avoid
+  var sensorBehavior = 1.obs; // 0=Ignore, 1=Bumper Emergency Only, 2=Bumper Emergency + Ultrasonic Stop, 3=Bumper Emergency + Ultrasonic Avoid
   var perimeterDryRun = false.obs;
   var dockStationAtHome = false.obs;
   var engineeringUnlocked = false.obs;
+  var serviceUnlocked = false.obs;
   Timer? _debounceTimer;
 
   final accessCodeController = TextEditingController();
@@ -50,6 +51,11 @@ class MowerSettingsController extends GetxController {
     if (accessCodeController.text == "developer") {
       engineeringUnlocked.value = true;
       engineeringUnlocked.refresh();
+      serviceUnlocked.value = true;
+      serviceUnlocked.refresh();
+    } else if (accessCodeController.text == "service") {
+      serviceUnlocked.value = true;
+      serviceUnlocked.refresh();
     }
   }
 
