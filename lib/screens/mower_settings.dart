@@ -33,16 +33,19 @@ class MowerSettings extends GetView<MowerSettingsController> {
           ])..mb = 8,
           n.Row([
             n.Text("Sensor Behavior"),
-            Expanded(child: Container()),
-            Obx(() => DropdownButton<int>(
-              value: controller.sensorBehavior.value,
-              items: const [
-                DropdownMenuItem(value: 0, child: Text("Ignore")),
-                DropdownMenuItem(value: 1, child: Text("Stop")),
-                // DropdownMenuItem(value: 2, child: Text("Avoid")),
-              ],
-              onChanged: (v) => controller.updateSensorBehavior(v!),
-            )),
+            Expanded(
+              child: Obx(() => DropdownButton<int>(
+                value: controller.sensorBehavior.value,
+                isExpanded: true,
+                items: const [
+                  DropdownMenuItem(value: 0, child: Text("Ignore")),
+                  DropdownMenuItem(value: 1, child: Text("Bumper Emergency Only")),
+                  DropdownMenuItem(value: 2, child: Text("Bumper Emergency + Ultrasonic Stop")),
+                  DropdownMenuItem(value: 3, child: Text("Bumper Emergency + Ultrasonic Avoid")),
+                ],
+                onChanged: (v) => controller.updateSensorBehavior(v!),
+              )),
+            ),
           ])..mb = 8,
           n.Row([
             n.Text("Perimeter Dry Run"),
